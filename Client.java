@@ -27,16 +27,27 @@ public class Client {
             byte[] contentByte = new byte[1024];
             contentByte = content.getBytes();
             DatagramPacket request = new DatagramPacket(contentByte, contentByte.length, serverAddress, portNum);
-            clientSocket.send(request);
 
+            // Simple system to prevent packet loss
             DatagramPacket response = new DatagramPacket(new byte[1024], 1024);
-            clientSocket.receive(response);
-            
+            boolean recievedResponse = false;
+            String resopnceContent = "";
+            while (!recievedResponse) {
+                clientSocket.send(request);
+
+                try {
+                    clientSocket.receive(response);
+                    recievedResponse = true;
+                } catch (SocketTimeoutException e) {
+                    System.out.println("Packet lost, retrying...");
+                    recievedResponse = false;
+                }
+            }
+
             BufferedReader bufferedReader 
-                = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(response.getData())));
+                    = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(response.getData())));
 
-            String resopnceContent = bufferedReader.readLine();
-
+            resopnceContent = bufferedReader.readLine();
             System.out.println(resopnceContent);
         }
     }
