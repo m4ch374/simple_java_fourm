@@ -8,8 +8,31 @@ public class Server {
             System.exit(1);
         }
 
+        // Setup server socket and port number
+        // socket timeout is 500
         int portNum = getPortNum(args[0]);
         System.out.println("Server port is " + portNum);
+        DatagramSocket serverSocket = new DatagramSocket(portNum);
+
+        // Main program
+        System.out.println("Server is starting...\n");
+        while (true) {
+            DatagramPacket clientRequest = new DatagramPacket(new byte[1024], 1024);
+            serverSocket.receive(clientRequest);
+
+            BufferedReader bufferedReader 
+                = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(clientRequest.getData())));
+            
+            String requestContent = bufferedReader.readLine();
+            System.out.println(requestContent);
+
+            String responseContent = "OK";
+            byte[] buffer = new byte[1024];
+            buffer = responseContent.getBytes();
+            DatagramPacket response 
+                = new DatagramPacket(buffer, buffer.length, clientRequest.getAddress(), clientRequest.getPort());
+            serverSocket.send(response);
+        }
     }
 
     // Check if there is error

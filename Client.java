@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 
 public class Client {
     public static void main(String args[]) throws Exception {
@@ -8,8 +9,36 @@ public class Client {
             System.exit(1);
         }
 
+        // Get Server address and port number
+        InetAddress serverAddress = InetAddress.getLocalHost();
         int portNum = getPortNum(args[0]);
         System.out.println("Server port is " + portNum);
+
+        // Setup client socket
+        // Socket timeout is 500ms
+        DatagramSocket clientSocket = new DatagramSocket();
+        clientSocket.setSoTimeout(500);
+
+        // Main program
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            // Send content
+            String content = scanner.nextLine();
+            byte[] contentByte = new byte[1024];
+            contentByte = content.getBytes();
+            DatagramPacket request = new DatagramPacket(contentByte, contentByte.length, serverAddress, portNum);
+            clientSocket.send(request);
+
+            DatagramPacket response = new DatagramPacket(new byte[1024], 1024);
+            clientSocket.receive(response);
+            
+            BufferedReader bufferedReader 
+                = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(response.getData())));
+
+            String resopnceContent = bufferedReader.readLine();
+
+            System.out.println(resopnceContent);
+        }
     }
 
     // Check if there is error
