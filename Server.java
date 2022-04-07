@@ -12,26 +12,23 @@ public class Server {
         // socket timeout is 500
         int portNum = getPortNum(args[0]);
         System.out.println("Server port is " + portNum);
-        DatagramSocket serverSocket = new DatagramSocket(portNum);
+        HPTServer server = new HPTServer(portNum);
 
         // Main program
         System.out.println("Server is starting...\n");
         while (true) {
-            DatagramPacket clientRequest = new DatagramPacket(new byte[1024], 1024);
-            serverSocket.receive(clientRequest);
+            DatagramPacket clientRequest = server.getRequest();
+            String requestContent = HPTServer.getRequestContent(clientRequest);
 
-            BufferedReader bufferedReader 
-                = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(clientRequest.getData())));
-            
-            String requestContent = bufferedReader.readLine();
             System.out.println(requestContent);
 
-            String responseContent = "OK";
-            byte[] buffer = new byte[1024];
-            buffer = responseContent.getBytes();
-            DatagramPacket response 
-                = new DatagramPacket(buffer, buffer.length, clientRequest.getAddress(), clientRequest.getPort());
-            serverSocket.send(response);
+            try {
+                server.sendResponce("OK");
+            } catch (Exception e) {
+                System.out.println("Exception occurred: \n");
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 

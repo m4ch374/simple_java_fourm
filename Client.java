@@ -14,41 +14,19 @@ public class Client {
         int portNum = getPortNum(args[0]);
         System.out.println("Server port is " + portNum);
 
-        // Setup client socket
+        // Setup client
         // Socket timeout is 500ms
-        DatagramSocket clientSocket = new DatagramSocket();
-        clientSocket.setSoTimeout(500);
+        HPTClient client = new HPTClient(serverAddress, portNum, 500);
 
         // Main program
         Scanner scanner = new Scanner(System.in);
         while (true) {
             // Send content
             String content = scanner.nextLine();
-            byte[] contentByte = new byte[1024];
-            contentByte = content.getBytes();
-            DatagramPacket request = new DatagramPacket(contentByte, contentByte.length, serverAddress, portNum);
+            DatagramPacket response = client.sendRequest(content);
 
-            // Simple system to prevent packet loss
-            DatagramPacket response = new DatagramPacket(new byte[1024], 1024);
-            boolean recievedResponse = false;
-            String resopnceContent = "";
-            while (!recievedResponse) {
-                clientSocket.send(request);
-
-                try {
-                    clientSocket.receive(response);
-                    recievedResponse = true;
-                } catch (SocketTimeoutException e) {
-                    System.out.println("Packet lost, retrying...");
-                    recievedResponse = false;
-                }
-            }
-
-            BufferedReader bufferedReader 
-                    = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(response.getData())));
-
-            resopnceContent = bufferedReader.readLine();
-            System.out.println(resopnceContent);
+            String responseContent = HPTClient.getPacketContent(response);
+            System.out.println(responseContent);
         }
     }
 
