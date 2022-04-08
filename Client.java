@@ -32,10 +32,9 @@ public class Client {
             System.out.println("Please enter a command: ");
             System.out.println("CRT, MSG, DLT, EDT, LST, RDT, UPD, DWN, RMV, XIT: ");
             String content = scanner.nextLine();
-            DatagramPacket response = client.sendRequest(content);
+            HPTPacket response = client.sendRequest(content);
 
-            String responseContent = HPTClient.getPacketContent(response);
-            printResponse(responseContent);
+            printResponse(response);
             System.out.print("\n");
         }
     }
@@ -72,47 +71,65 @@ public class Client {
             // Login with username
             System.out.print("Enter Username: ");
             String username = scanner.nextLine();
-            DatagramPacket response = client.sendRequest("LOGIN " + username + "\n");
+            HPTPacket response = client.sendRequest("LOGIN " + username + "\n");
 
-            String loginResponse = HPTClient.getPacketContent(response);
-            if (loginResponse.equals("ERR Already logged in")) {
-                System.out.println("An user already logged in with this username, try again...");
-                login_successful = false;
-            } else if (loginResponse.equals("ERR No username")) {
-                System.out.print("New user, enter password: ");
-                String password = scanner.nextLine();
-                DatagramPacket resp = client.sendRequest("NEWUSER " + username + " " + password + "\n");
-                String respContent = HPTClient.getPacketContent(resp);
-                login_successful = true;
-                clientId = Integer.parseInt(respContent.split(" ")[1]);
-            } else if (loginResponse.equals("OK")) {
+            // Handle errors
+            if (response.header.equals("ERR")) {
+                // If user with said username is already logged in, 
+                // client have to login with a new user name
+                //
+                // If the username isnt in the database,
+                // client register a new user
+                //
+                // Unknown exception from the server otherwise
+                if (response.content.equals("Already logged in")) {
+                    System.out.println("An user already logged in with this username, try again...");
+                    login_successful = false;
+                } else if (response.content.equals("No username")) {
+                    login_successful = registerNewUser(username, scanner);
+                } else {
+                    throw new Exception("Unknow error occurred from the server");
+                }
+            } else if (response.header.equals("UNAMEOK")) {
+                // Login if UNAMEOK
                 login_successful = loginWithPassword(username, scanner);
             } else {
-                throw new Exception("Unknown error occurred");
+                throw new Exception("Unknow error occurred");
             }
         }
         System.out.println("Client id is: " + clientId);
     }
 
+    private static boolean registerNewUser(String username, Scanner scanner) throws Exception {
+        System.out.print("New user, enter password: ");
+        String password = scanner.nextLine();
+        HPTPacket resp = client.sendRequest("NEWUSER " + username + " " + password + "\n");
+
+        if (resp.header.equals("LOGINOK")) {
+            clientId = Integer.parseInt(resp.content);
+            return true;
+        }
+
+        throw new Exception("Unknown error occured from the server");
+    }
+
     private static boolean loginWithPassword(String username, Scanner scanner) throws Exception {
         System.out.print("Enter Password: ");
         String password = scanner.nextLine();
-        DatagramPacket resp = client.sendRequest("PASSWORD " + username + " " + password + "\n");
-        String respContent = HPTClient.getPacketContent(resp);
+        HPTPacket resp = client.sendRequest("PASSWORD " + username + " " + password + "\n");
         
-        if (!respContent.split(" ")[0].equals("LOGINOK")) {
+        if (!resp.header.equals("LOGINOK")) {
             System.out.println("Incorrect password, try again...");
             return false;
         } else {
-            clientId = Integer.parseInt(respContent.split(" ")[1]);
+            clientId = Integer.parseInt(resp.content);
             return true;
         }
     }
 
-    private static void printResponse(String response) {
-        if (!response.equals("OK")) {
-            String content = response.split(" ", 2)[1];
-            System.out.println(content);
+    private static void printResponse(HPTPacket response) {
+        if (!response.header.equals("OK")) {
+            System.out.println(response.content);
         }
     }
 }

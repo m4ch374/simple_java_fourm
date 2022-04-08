@@ -1,5 +1,3 @@
-import java.net.*;
-
 import HPT.*;
 import others.*;
 
@@ -30,10 +28,9 @@ public class Server {
         // Main program
         System.out.println("Server is starting...\n");
         while (true) {
-            DatagramPacket clientRequest = server.getRequest();
-            String requestContent = HPTServer.getRequestContent(clientRequest);
+            HPTPacket clientRequest = server.getRequest();
 
-            String response = processRequest(requestContent);
+            String response = processRequest(clientRequest);
 
             try {
                 server.sendResponce(response);
@@ -71,19 +68,19 @@ public class Server {
         return portNum;
     }
 
-    private static String processRequest(String request) throws Exception {
-        // System.out.println(request);
-        String[] splittedRequest = request.split(" ", 2);
-        String command = splittedRequest[0];
+    private static String processRequest(HPTPacket request) throws Exception {
+        // System.out.println(request.rawContent);
+        String command = request.header;
+        String body = request.content;
 
         System.out.print("\n");
         switch (command) {
             case "LOGIN":
-                return processLogin(splittedRequest[1]);
+                return processLogin(body);
             case "PASSWORD":
-                return processLoginPassword(splittedRequest[1]);
+                return processLoginPassword(body);
             case "NEWUSER":
-                return processNewUser(splittedRequest[1]);
+                return processNewUser(body);
             default:
                 return "ERR Command Not Found\n";
         }
@@ -99,7 +96,7 @@ public class Server {
 
         if (database.usrLogin(username)) {
             System.out.println(username + " entering password");
-            return "OK\n";
+            return "UNAMEOK\n";
         } else {
             System.out.println("New user, entering password");
             return "ERR No username\n";

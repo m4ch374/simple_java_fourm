@@ -1,6 +1,5 @@
 package HPT;
 
-import java.io.*;
 import java.net.*;
 
 public class HPTServer {
@@ -19,13 +18,14 @@ public class HPTServer {
         serverSocket = new DatagramSocket(this.portNum);
     }
 
-    public DatagramPacket getRequest() throws Exception {
+    public HPTPacket getRequest() throws Exception {
         DatagramPacket clientRequest = new DatagramPacket(new byte[PACKETLEN], PACKETLEN);
         serverSocket.receive(clientRequest);
 
         clientAddress = clientRequest.getAddress();
         clientPort = clientRequest.getPort();
-        return clientRequest;
+
+        return HPTPacket.generateFromUDP(clientRequest);
     }
 
     public void sendResponce(String content) throws Exception {
@@ -37,15 +37,5 @@ public class HPTServer {
         DatagramPacket responsePacket 
             = new DatagramPacket(contentBuffer, contentBuffer.length, clientAddress, clientPort);
         serverSocket.send(responsePacket);
-    }
-
-    public static String getRequestContent(DatagramPacket packet) throws Exception {
-        ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(packet.getData());
-
-        InputStreamReader streamReader = new InputStreamReader(arrayInputStream);
-
-        BufferedReader bufferedReader = new BufferedReader(streamReader);
-
-        return bufferedReader.readLine();
     }
 }
