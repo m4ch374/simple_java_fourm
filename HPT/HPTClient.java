@@ -2,7 +2,6 @@ package HPT;
 
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
 
 public class HPTClient {
     // Client attributes
