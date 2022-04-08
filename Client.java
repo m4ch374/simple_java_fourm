@@ -2,6 +2,8 @@ import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
+import HPT.*;
+
 public class Client {
     // Attributes
     private static HPTClient client;

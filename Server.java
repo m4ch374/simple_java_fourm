@@ -1,6 +1,9 @@
 import java.io.*;
 import java.net.*;
 
+import HPT.*;
+import others.*;
+
 public class Server {
     // Attributes
     private static HPTServer server;
