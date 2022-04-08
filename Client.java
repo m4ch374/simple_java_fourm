@@ -32,7 +32,7 @@ public class Client {
             System.out.println("Please enter a command: ");
             System.out.println("CRT, MSG, DLT, EDT, LST, RDT, UPD, DWN, RMV, XIT: ");
             String content = scanner.nextLine();
-            HPTPacket response = client.sendRequest(content + " " + clientId + "\n");
+            HPTPacket response = client.sendRequest(content + " " + clientId);
 
             processResopnse(response);
             System.out.print("\n");
@@ -72,7 +72,7 @@ public class Client {
             System.out.print("\n");
             System.out.print("Enter Username: ");
             String username = scanner.nextLine();
-            HPTPacket response = client.sendRequest("LOGIN " + username + "\n");
+            HPTPacket response = client.sendRequest("LOGIN " + username);
 
             // Handle errors
             if (response.header.equals("ERR")) {
@@ -103,7 +103,7 @@ public class Client {
     private static boolean registerNewUser(String username, Scanner scanner) throws Exception {
         System.out.print("New user, enter password: ");
         String password = scanner.nextLine();
-        HPTPacket resp = client.sendRequest("NEWUSER " + username + " " + password + "\n");
+        HPTPacket resp = client.sendRequest("NEWUSER " + username + " " + password);
 
         if (resp.header.equals("LOGINOK")) {
             clientId = Integer.parseInt(resp.content);
@@ -116,7 +116,7 @@ public class Client {
     private static boolean loginWithPassword(String username, Scanner scanner) throws Exception {
         System.out.print("Enter Password: ");
         String password = scanner.nextLine();
-        HPTPacket resp = client.sendRequest("PASSWORD " + username + " " + password + "\n");
+        HPTPacket resp = client.sendRequest("PASSWORD " + username + " " + password);
         
         if (!resp.header.equals("LOGINOK")) {
             System.out.println("Incorrect password, try again...");

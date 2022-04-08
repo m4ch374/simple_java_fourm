@@ -12,6 +12,15 @@ public class Database {
 
     // Constants
     private static final String DIR_PATH = "./";
+    private static final String[] OG_FILE_LIST = new String[] {
+            ".gitignore", 
+            "README.md", 
+            "credentials.txt", 
+            "Server.java",
+            "Client.class",
+            "Server.class",
+            "Client.java"
+        };
 
     public Database(String credFilePath) throws Exception{
         this.credFilePath = credFilePath;
@@ -79,6 +88,19 @@ public class Database {
         fileWriter.write(usrName + "\n");
         fileWriter.close();
         return true;
+    }
+
+    public ArrayList<String> getThreadList() {
+        ArrayList<String> threadList = new ArrayList<String>();
+
+        File dir = new File(DIR_PATH);
+        File[] fileList = dir.listFiles();
+        for (File file : fileList) {
+            if (file.isFile() && !Arrays.stream(OG_FILE_LIST).anyMatch(file.getName()::equals)) {
+                threadList.add(file.getName());
+            }
+        }
+        return threadList;
     }
 
     public void printCredentials() {

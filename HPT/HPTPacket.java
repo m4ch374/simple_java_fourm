@@ -1,6 +1,5 @@
 package HPT;
 
-import java.io.*;
 import java.net.*;
 
 public class HPTPacket {
@@ -23,13 +22,13 @@ public class HPTPacket {
     }
 
     public static String getUdpContent(DatagramPacket packet) throws Exception {
-        ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(packet.getData());
+        // ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(packet.getData());
 
-        InputStreamReader streamReader = new InputStreamReader(arrayInputStream);
+        // InputStreamReader streamReader = new InputStreamReader(arrayInputStream);
 
-        BufferedReader bufferedReader = new BufferedReader(streamReader);
+        // BufferedReader bufferedReader = new BufferedReader(streamReader);
 
-        return bufferedReader.readLine();
+        return new String(packet.getData(), 0, packet.getLength());
     }
 
     public static HPTPacket generateFromUDP(DatagramPacket packet) throws Exception {

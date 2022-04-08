@@ -1,3 +1,5 @@
+import java.util.*;
+
 import HPT.*;
 import others.*;
 
@@ -8,7 +10,7 @@ public class Server {
 
     // Constants
     private static final String CREDENTIAL_PATH = "./credentials.txt";
-    private static final String INVALID_USAGE = "ERR Invalid command usage\n";
+    private static final String INVALID_USAGE = "ERR Invalid command usage";
 
     public static void main(String args[]) throws Exception {
         // Exit the program if there are errors in args
@@ -84,10 +86,12 @@ public class Server {
                 return processNewUser(body);
             case "CRT":
                 return processCreateThread(body);
+            case "LST":
+                return processListThread(body);
             case "XIT":
                 return processExit(body);
             default:
-                return "ERR Command Not Found\n";
+                return "ERR Command Not Found";
         }
     }
 
@@ -96,15 +100,15 @@ public class Server {
 
         if (database.isUserAlreadyLoggedIn(username)) {
             System.out.println("Username " + username + " already logged in");
-            return "ERR Already logged in\n";
+            return "ERR Already logged in";
         }
 
         if (database.usrLogin(username)) {
             System.out.println(username + " entering password");
-            return "UNAMEOK\n";
+            return "UNAMEOK";
         } else {
             System.out.println("New user, entering password");
-            return "ERR No username\n";
+            return "ERR No username";
         }
     }
 
@@ -114,17 +118,17 @@ public class Server {
         int userId = database.usrLoginPassword(credentials[0], credentials[1]);
         if (userId != -1) {
             System.out.println(credentials[0] + " successful login");
-            return "LOGINOK " + userId + "\n";
+            return "LOGINOK " + userId;
         }
 
         System.out.println("Incorrect password");
-        return "ERR No such user\n";
+        return "ERR No such user";
     }
 
     private static String processNewUser(String args) throws Exception {
         int newId = database.addNewUser(args);
         System.out.println("New user created, successful login");
-        return "LOGINOK " + newId + "\n";
+        return "LOGINOK " + newId;
     }
 
     private static String processCreateThread(String args) throws Exception {
@@ -141,13 +145,36 @@ public class Server {
         User usr = database.users.get(usrId);
         if (database.createThread(usr.username, threadName)) {
             System.out.println(usr.username + " created thread " + threadName);
-            return "OK Thread " + threadName + " created\n";
+            return "OK Thread " + threadName + " created";
         } else {
             System.out.println(usr.username + " failed to create thread:");
 
             String errMsg = "Thread "+ threadName + " already exist";
             System.out.println(errMsg);
-            return "ERR " + errMsg + "\n";
+            return "ERR " + errMsg;
+        }
+    }
+
+    private static String processListThread(String args) throws Exception {
+        // Initial error handling
+        String[] splittedArgs = args.split(" ");
+        if (splittedArgs.length != 1) {
+            printCommandFailedUse("LST");
+            return INVALID_USAGE;
+        }
+
+        User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
+        ArrayList<String> threadList = database.getThreadList();
+        System.out.println(usr.username + " listed threads");
+        if (threadList.size() == 0) {
+            return "OK No threads to list";
+        } else {
+            String joinedList = "";
+            for (String threadName : threadList) {
+                joinedList += threadName + "\n";
+            }
+
+            return "OK " + joinedList;
         }
     }
 
@@ -167,7 +194,7 @@ public class Server {
             System.out.println("\nWaiting for users");
         }
 
-        return "XITOK Goodbye!\n";
+        return "XITOK Goodbye!";
     }
 
     private static void printCommandFailedUse(String command) {
