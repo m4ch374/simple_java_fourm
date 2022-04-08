@@ -33,9 +33,7 @@ public class Server {
             DatagramPacket clientRequest = server.getRequest();
             String requestContent = HPTServer.getRequestContent(clientRequest);
 
-            System.out.println(requestContent);
             String response = processRequest(requestContent);
-            System.out.println(response);
 
             try {
                 server.sendResponce(response);
@@ -74,6 +72,7 @@ public class Server {
     }
 
     private static String processRequest(String request) throws Exception {
+        System.out.println(request);
         String[] splittedRequest = request.split(" ", 2);
         String command = splittedRequest[0];
 
@@ -90,7 +89,10 @@ public class Server {
     }
 
     private static String processLogin(String username) {
+        System.out.println("Client authenticating");
+
         if (database.isUserAlreadyLoggedIn(username)) {
+            System.out.println("Username " + username + "already logged in");
             return "ERR Already logged in\n";
         }
 

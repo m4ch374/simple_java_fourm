@@ -18,7 +18,6 @@ public class Database {
     public boolean usrLogin(String username) {
         for (User usr : users) {
             if (usr.username.equals(username)) {
-                System.out.println("hi");
                 return true;
             }
         }
@@ -29,6 +28,7 @@ public class Database {
     public boolean usrLoginPassword(String usrname, String password) {
         for (User usr : users) {
             if (usr.username.equals(usrname) && usr.password.equals(password)) {
+                loggedInUsers.add(usr);
                 return true;
             }
         }
