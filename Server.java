@@ -109,9 +109,10 @@ public class Server {
     private static String processLoginPassword(String args) {
         String[] credentials = args.split(" ");
 
-        if (database.usrLoginPassword(credentials[0], credentials[1])) {
+        int userId = database.usrLoginPassword(credentials[0], credentials[1]);
+        if (userId != -1) {
             System.out.println(credentials[0] + " successful login");
-            return "OK\n";
+            return "LOGINOK " + userId + "\n";
         }
 
         System.out.println("Incorrect password");
@@ -119,8 +120,8 @@ public class Server {
     }
 
     private static String processNewUser(String args) throws Exception {
-        database.addNewUser(args);
+        int newId = database.addNewUser(args);
         System.out.println("New user created, successful login");
-        return "OK\n";
+        return "LOGINOK " + newId + "\n";
     }
 }

@@ -5,6 +5,7 @@ import HPT.*;
 
 public class Client {
     // Attributes
+    private static int clientId;
     private static HPTClient client;
 
     public static void main(String args[]) throws Exception {
@@ -80,14 +81,17 @@ public class Client {
             } else if (loginResponse.equals("ERR No username")) {
                 System.out.print("New user, enter password: ");
                 String password = scanner.nextLine();
-                client.sendRequest("NEWUSER " + username + " " + password + "\n");
+                DatagramPacket resp = client.sendRequest("NEWUSER " + username + " " + password + "\n");
+                String respContent = HPTClient.getPacketContent(resp);
                 login_successful = true;
+                clientId = Integer.parseInt(respContent.split(" ")[1]);
             } else if (loginResponse.equals("OK")) {
                 login_successful = loginWithPassword(username, scanner);
             } else {
                 throw new Exception("Unknown error occurred");
             }
         }
+        System.out.println("Client id is: " + clientId);
     }
 
     private static boolean loginWithPassword(String username, Scanner scanner) throws Exception {
@@ -96,10 +100,11 @@ public class Client {
         DatagramPacket resp = client.sendRequest("PASSWORD " + username + " " + password + "\n");
         String respContent = HPTClient.getPacketContent(resp);
         
-        if (!respContent.equals("OK")) {
+        if (!respContent.split(" ")[0].equals("LOGINOK")) {
             System.out.println("Incorrect password, try again...");
             return false;
         } else {
+            clientId = Integer.parseInt(respContent.split(" ")[1]);
             return true;
         }
     }

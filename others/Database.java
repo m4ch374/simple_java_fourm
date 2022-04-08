@@ -25,14 +25,16 @@ public class Database {
         return false;
     }
 
-    public boolean usrLoginPassword(String usrname, String password) {
-        for (User usr : users) {
+    // Returns the user id
+    public int usrLoginPassword(String usrname, String password) {
+        for (int i = 0; i < users.size(); i++) {
+            User usr = users.get(i);
             if (usr.username.equals(usrname) && usr.password.equals(password)) {
                 loggedInUsers.add(usr);
-                return true;
+                return i;
             }
         }
-        return false;
+        return -1;
     }
 
     public boolean isUserAlreadyLoggedIn(String username) {
@@ -45,7 +47,7 @@ public class Database {
         return false;
     }
 
-    public void addNewUser(String credentials) throws Exception {
+    public int addNewUser(String credentials) throws Exception {
         FileWriter fileWriter = new FileWriter(credFilePath, true);
 
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
@@ -55,10 +57,12 @@ public class Database {
         printWriter.println(credentials);
         printWriter.close();
 
+        int newId = users.size();
         String[] splittedCred = credentials.split(" ");
-        User usr = new User(splittedCred[0], splittedCred[1]);
+        User usr = new User(newId, splittedCred[0], splittedCred[1]);
         users.add(usr);
         loggedInUsers.add(usr);
+        return newId;
     }
 
     public void printCredentials() {
@@ -73,11 +77,13 @@ public class Database {
         File file = new File(credFilePath);
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 
+        int u_id = 0;
         String credentials;
         while ((credentials = bufferedReader.readLine()) != null) {
             String[] credentialArray = credentials.split(" ");
 
-            userList.add(new User(credentialArray[0], credentialArray[1]));
+            userList.add(new User(u_id, credentialArray[0], credentialArray[1]));
+            u_id++;
         }
 
         bufferedReader.close();
