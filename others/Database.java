@@ -96,6 +96,8 @@ public class Database {
         File dir = new File(DIR_PATH);
         File[] fileList = dir.listFiles();
         for (File file : fileList) {
+            // Code borrowed form:
+            // https://stackoverflow.com/questions/1128723/how-do-i-determine-whether-an-array-contains-a-particular-value-in-java
             if (file.isFile() && !Arrays.stream(OG_FILE_LIST).anyMatch(file.getName()::equals)) {
                 threadList.add(file.getName());
             }
