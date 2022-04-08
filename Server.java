@@ -7,7 +7,8 @@ public class Server {
     private static Database database;
 
     // Constants
-    private static final String credentialFilePath = "./credentials.txt";
+    private static final String CREDENTIAL_PATH = "./credentials.txt";
+    private static final String INVALID_USAGE = "ERR Invalid command usage\n";
 
     public static void main(String args[]) throws Exception {
         // Exit the program if there are errors in args
@@ -22,7 +23,7 @@ public class Server {
         server = new HPTServer(portNum);
 
         // Setup database
-        database = new Database(credentialFilePath);
+        database = new Database(CREDENTIAL_PATH);
         database.printCredentials();
 
         // Main program
@@ -69,7 +70,7 @@ public class Server {
     }
 
     private static String processRequest(HPTPacket request) throws Exception {
-        System.out.println(request.rawContent);
+        // System.out.println(request.rawContent);
         String command = request.header;
         String body = request.content;
 
@@ -81,6 +82,8 @@ public class Server {
                 return processLoginPassword(body);
             case "NEWUSER":
                 return processNewUser(body);
+            case "CRT":
+                return processCreateThread(body);
             case "XIT":
                 return processExit(body);
             default:
@@ -124,16 +127,44 @@ public class Server {
         return "LOGINOK " + newId + "\n";
     }
 
+    private static String processCreateThread(String args) throws Exception {
+        // Initial error handling
+        String[] splittedArgs = args.split(" ");
+        if (splittedArgs.length != 2) {
+            return INVALID_USAGE;
+        }
+
+        // Create and check if thread already exist
+        String threadName = splittedArgs[0];
+        int usrId = Integer.parseInt(splittedArgs[1]);
+        User usr = database.users.get(usrId);
+        if (database.createThread(usr.username, threadName)) {
+            System.out.println(usr.username + " created thread " + threadName);
+            return "OK Thread " + threadName + " created\n";
+        } else {
+            System.out.println(usr.username + " failed to create thread:");
+
+            String errMsg = "Thread "+ threadName + " already exist";
+            System.out.println(errMsg);
+            return "ERR " + errMsg + "\n";
+        }
+    }
+
     private static String processExit(String args) {
         int userId;
         try {
             userId = Integer.parseInt(args);
         } catch (Exception e) {
-            return "ERR Invalid usage of command";
+            return INVALID_USAGE;
         }
         User usr = database.users.get(userId);
         System.out.println(usr.username + " logged out");
         database.loggedInUsers.remove(usr);
-        return "XITOK\n";
+
+        if (database.loggedInUsers.size() == 0) {
+            System.out.println("\nWaiting for users");
+        }
+
+        return "XITOK Goodbye!\n";
     }
 }

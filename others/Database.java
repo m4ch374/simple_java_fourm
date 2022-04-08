@@ -10,6 +10,9 @@ public class Database {
 
     private String credFilePath;
 
+    // Constants
+    private static final String DIR_PATH = "./";
+
     public Database(String credFilePath) throws Exception{
         this.credFilePath = credFilePath;
         users = getUsers();
@@ -63,6 +66,19 @@ public class Database {
         users.add(usr);
         loggedInUsers.add(usr);
         return newId;
+    }
+
+    public boolean createThread(String usrName, String threadName) throws Exception {
+        String fileName = DIR_PATH + threadName;
+        File thread = new File(fileName);
+        if (!thread.createNewFile()) {
+            return false;
+        }
+        
+        FileWriter fileWriter = new FileWriter(fileName);
+        fileWriter.write(usrName + "\n");
+        fileWriter.close();
+        return true;
     }
 
     public void printCredentials() {

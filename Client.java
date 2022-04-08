@@ -69,6 +69,7 @@ public class Client {
         boolean login_successful = false;
         while (!login_successful) {
             // Login with username
+            System.out.print("\n");
             System.out.print("Enter Username: ");
             String username = scanner.nextLine();
             HPTPacket response = client.sendRequest("LOGIN " + username + "\n");
@@ -128,13 +129,13 @@ public class Client {
 
     private static void processResopnse(HPTPacket response) {
         System.out.print("\n");
-        if (response.header.equals("XITOK")) {
-            System.out.println("Goodbye!");
-            System.exit(0);
+
+        if (!response.content.equals("")) {
+            System.out.println(response.content);
         }
 
-        if (!response.header.equals("OK")) {
-            System.out.println(response.content);
+        if (response.header.equals("XITOK")) {
+            System.exit(0);
         }
     }
 }
