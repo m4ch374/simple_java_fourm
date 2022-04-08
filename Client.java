@@ -97,7 +97,6 @@ public class Client {
                 throw new Exception("Unknow error occurred");
             }
         }
-        System.out.println("Client id is: " + clientId);
     }
 
     private static boolean registerNewUser(String username, Scanner scanner) throws Exception {
