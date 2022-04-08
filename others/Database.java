@@ -5,8 +5,8 @@ import java.util.*;
 
 public class Database {
     // An array containing User object
-    private ArrayList<User> users = new ArrayList<User>();
-    private ArrayList<User> loggedInUsers = new ArrayList<User>();
+    public ArrayList<User> users = new ArrayList<User>();
+    public ArrayList<User> loggedInUsers = new ArrayList<User>();
 
     private String credFilePath;
 

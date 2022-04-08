@@ -32,9 +32,9 @@ public class Client {
             System.out.println("Please enter a command: ");
             System.out.println("CRT, MSG, DLT, EDT, LST, RDT, UPD, DWN, RMV, XIT: ");
             String content = scanner.nextLine();
-            HPTPacket response = client.sendRequest(content);
+            HPTPacket response = client.sendRequest(content + " " + clientId + "\n");
 
-            printResponse(response);
+            processResopnse(response);
             System.out.print("\n");
         }
     }
@@ -127,7 +127,13 @@ public class Client {
         }
     }
 
-    private static void printResponse(HPTPacket response) {
+    private static void processResopnse(HPTPacket response) {
+        System.out.println(response.header);
+        if (response.header.equals("XITOK")) {
+            System.out.println("\nGoodbye!\n");
+            System.exit(0);
+        }
+
         if (!response.header.equals("OK")) {
             System.out.println(response.content);
         }

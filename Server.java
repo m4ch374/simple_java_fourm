@@ -69,7 +69,7 @@ public class Server {
     }
 
     private static String processRequest(HPTPacket request) throws Exception {
-        // System.out.println(request.rawContent);
+        System.out.println(request.rawContent);
         String command = request.header;
         String body = request.content;
 
@@ -81,6 +81,8 @@ public class Server {
                 return processLoginPassword(body);
             case "NEWUSER":
                 return processNewUser(body);
+            case "XIT":
+                return processExit(body);
             default:
                 return "ERR Command Not Found\n";
         }
@@ -90,7 +92,7 @@ public class Server {
         System.out.println("Client authenticating...");
 
         if (database.isUserAlreadyLoggedIn(username)) {
-            System.out.println("Username " + username + "already logged in");
+            System.out.println("Username " + username + " already logged in");
             return "ERR Already logged in\n";
         }
 
@@ -120,5 +122,13 @@ public class Server {
         int newId = database.addNewUser(args);
         System.out.println("New user created, successful login");
         return "LOGINOK " + newId + "\n";
+    }
+
+    private static String processExit(String args) {
+        int userId = Integer.parseInt(args);
+        User usr = database.users.get(userId);
+        System.out.println(usr.username + " logged out");
+        database.loggedInUsers.remove(usr);
+        return "XITOK\n";
     }
 }

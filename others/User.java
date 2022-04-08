@@ -1,9 +1,9 @@
 package others;
 
 public class User {
-    int id;
-    String username;
-    String password;
+    public int id;
+    public String username;
+    public String password;
 
     public User(int id, String username, String password) {
         this.id = id;
