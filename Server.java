@@ -131,6 +131,7 @@ public class Server {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 2) {
+            printCommandFailedUse("CRT");
             return INVALID_USAGE;
         }
 
@@ -155,6 +156,7 @@ public class Server {
         try {
             userId = Integer.parseInt(args);
         } catch (Exception e) {
+            printCommandFailedUse("XIT");
             return INVALID_USAGE;
         }
         User usr = database.users.get(userId);
@@ -166,5 +168,10 @@ public class Server {
         }
 
         return "XITOK Goodbye!\n";
+    }
+
+    private static void printCommandFailedUse(String command) {
+        System.out.println("A user failed to use " + command + ":");
+        System.out.println("Too many / too little arguments");
     }
 }
