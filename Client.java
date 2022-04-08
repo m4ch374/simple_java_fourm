@@ -28,12 +28,14 @@ public class Client {
         System.out.println("\nWelcome to the fourm\n");
         while (true) {
             // Send content
-            System.out.println("Please enter a command");
+            System.out.println("Please enter a command: ");
+            System.out.println("CRT, MSG, DLT, EDT, LST, RDT, UPD, DWN, RMV, XIT: ");
             String content = scanner.nextLine();
             DatagramPacket response = client.sendRequest(content);
 
             String responseContent = HPTClient.getPacketContent(response);
-            System.out.println(responseContent);
+            printResponse(responseContent);
+            System.out.print("\n");
         }
     }
 
@@ -72,7 +74,7 @@ public class Client {
             DatagramPacket response = client.sendRequest("LOGIN " + username + "\n");
 
             String loginResponse = HPTClient.getPacketContent(response);
-            if (loginResponse.equals("ERR Alread logged in")) {
+            if (loginResponse.equals("ERR Already logged in")) {
                 System.out.println("An user already logged in with this username, try again...");
                 login_successful = false;
             } else if (loginResponse.equals("ERR No username")) {
@@ -99,6 +101,13 @@ public class Client {
             return false;
         } else {
             return true;
+        }
+    }
+
+    private static void printResponse(String response) {
+        if (!response.equals("OK")) {
+            String content = response.split(" ", 2)[1];
+            System.out.println(content);
         }
     }
 }

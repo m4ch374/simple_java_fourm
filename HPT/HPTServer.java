@@ -12,7 +12,7 @@ public class HPTServer {
     public int clientPort = -1;
 
     // Constants
-    private static final int PACKETLEN = 1024;
+    private static final int PACKETLEN = 8192;
 
     public HPTServer(int portNum) throws Exception {
         this.portNum = portNum;

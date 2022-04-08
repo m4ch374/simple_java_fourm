@@ -72,10 +72,11 @@ public class Server {
     }
 
     private static String processRequest(String request) throws Exception {
-        System.out.println(request);
+        // System.out.println(request);
         String[] splittedRequest = request.split(" ", 2);
         String command = splittedRequest[0];
 
+        System.out.print("\n");
         switch (command) {
             case "LOGIN":
                 return processLogin(splittedRequest[1]);
@@ -89,7 +90,7 @@ public class Server {
     }
 
     private static String processLogin(String username) {
-        System.out.println("Client authenticating");
+        System.out.println("Client authenticating...");
 
         if (database.isUserAlreadyLoggedIn(username)) {
             System.out.println("Username " + username + "already logged in");
@@ -97,8 +98,10 @@ public class Server {
         }
 
         if (database.usrLogin(username)) {
+            System.out.println(username + " entering password");
             return "OK\n";
         } else {
+            System.out.println("New user, entering password");
             return "ERR No username\n";
         }
     }
@@ -107,14 +110,17 @@ public class Server {
         String[] credentials = args.split(" ");
 
         if (database.usrLoginPassword(credentials[0], credentials[1])) {
+            System.out.println(credentials[0] + " successful login");
             return "OK\n";
         }
 
+        System.out.println("Incorrect password");
         return "ERR No such user\n";
     }
 
     private static String processNewUser(String args) throws Exception {
         database.addNewUser(args);
+        System.out.println("New user created, successful login");
         return "OK\n";
     }
 }

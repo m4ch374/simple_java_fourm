@@ -10,7 +10,7 @@ public class HPTClient {
     public DatagramSocket clientSocket;
 
     // Constants
-    private static final int PACKETLEN = 1024;
+    private static final int PACKETLEN = 8192;
 
     public HPTClient(InetAddress hostAddress, int portNum, int timeout) throws Exception {
         this.hostAddress = hostAddress;
