@@ -1,7 +1,5 @@
 package others;
 
-import java.io.*;
-
 public class User {
     String username;
     String password;
