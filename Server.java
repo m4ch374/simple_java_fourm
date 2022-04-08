@@ -1,5 +1,3 @@
-import java.util.*;
-
 import HPT.*;
 import others.*;
 
@@ -164,17 +162,12 @@ public class Server {
         }
 
         User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
-        ArrayList<String> threadList = database.getThreadList();
+        String threadList = database.getThreadList();
         System.out.println(usr.username + " listed threads");
-        if (threadList.size() == 0) {
+        if (threadList.equals("")) {
             return "OK No threads to list";
         } else {
-            String joinedList = "";
-            for (String threadName : threadList) {
-                joinedList += threadName + "\n";
-            }
-
-            return "OK " + joinedList;
+            return "OK " + threadList;
         }
     }
 

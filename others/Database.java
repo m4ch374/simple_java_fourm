@@ -7,20 +7,21 @@ public class Database {
     // An array containing User object
     public ArrayList<User> users = new ArrayList<User>();
     public ArrayList<User> loggedInUsers = new ArrayList<User>();
+    public ArrayList<String> threads = new ArrayList<String>();
 
     private String credFilePath;
 
     // Constants
     private static final String DIR_PATH = "./";
-    private static final String[] OG_FILE_LIST = new String[] {
-            ".gitignore", 
-            "README.md", 
-            "credentials.txt", 
-            "Server.java",
-            "Client.class",
-            "Server.class",
-            "Client.java"
-        };
+    // private static final String[] OG_FILE_LIST = new String[] {
+    //         ".gitignore", 
+    //         "README.md", 
+    //         "credentials.txt", 
+    //         "Server.java",
+    //         "Client.class",
+    //         "Server.class",
+    //         "Client.java"
+    //     };
 
     public Database(String credFilePath) throws Exception{
         this.credFilePath = credFilePath;
@@ -87,20 +88,14 @@ public class Database {
         FileWriter fileWriter = new FileWriter(fileName);
         fileWriter.write(usrName + "\n");
         fileWriter.close();
+        threads.add(threadName);
         return true;
     }
 
-    public ArrayList<String> getThreadList() {
-        ArrayList<String> threadList = new ArrayList<String>();
-
-        File dir = new File(DIR_PATH);
-        File[] fileList = dir.listFiles();
-        for (File file : fileList) {
-            // Code borrowed form:
-            // https://stackoverflow.com/questions/1128723/how-do-i-determine-whether-an-array-contains-a-particular-value-in-java
-            if (file.isFile() && !Arrays.stream(OG_FILE_LIST).anyMatch(file.getName()::equals)) {
-                threadList.add(file.getName());
-            }
+    public String getThreadList() {
+        String threadList = "";
+        for (String threadName : threads) {
+            threadList += threadName + "\n";
         }
         return threadList;
     }
