@@ -125,7 +125,12 @@ public class Server {
     }
 
     private static String processExit(String args) {
-        int userId = Integer.parseInt(args);
+        int userId;
+        try {
+            userId = Integer.parseInt(args);
+        } catch (Exception e) {
+            return "ERR Invalid usage of command";
+        }
         User usr = database.users.get(userId);
         System.out.println(usr.username + " logged out");
         database.loggedInUsers.remove(usr);

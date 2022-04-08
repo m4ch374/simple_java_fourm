@@ -127,9 +127,9 @@ public class Client {
     }
 
     private static void processResopnse(HPTPacket response) {
-        System.out.println(response.header);
+        System.out.print("\n");
         if (response.header.equals("XITOK")) {
-            System.out.println("\nGoodbye!\n");
+            System.out.println("Goodbye!");
             System.exit(0);
         }
 
