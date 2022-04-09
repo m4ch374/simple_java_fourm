@@ -177,20 +177,8 @@ public class Database {
         }
 
         String originalMsg = getMsgInTread(threadName, msgId);
-        String threadContent = getThreadMsg(threadName);
-        threadContent = threadContent.replaceFirst(
-                originalMsg, 
-                originalMsg.split(" ")[0] + " " + userName + ": " + msg + "\n"
-            );
-
-        File thread = new File(threadName);
-        Scanner scanner = new Scanner(thread);
-        String creator = scanner.nextLine();
-        scanner.close();
-
-        FileWriter writer = new FileWriter(thread, false);
-        writer.write(creator + "\n" + threadContent);
-        writer.close();
+        String newMsg = originalMsg.split(" ")[0] + " " + userName + ": " + msg + "\n";
+        editThreadContent(threadName, originalMsg, newMsg);
         
         return true;
     }
@@ -265,11 +253,24 @@ public class Database {
     private boolean threadMsgIsOwner(String userName, String threadName, int msgId) throws Exception {
         String ogMessage = getMsgInTread(threadName, msgId);
         String owner = ogMessage.split(" ")[1];
-        System.out.println(owner);
         if (!owner.equals(userName + ":")) {
             return false;
         }
 
         return true;
+    }
+
+    private void editThreadContent(String threadName, String ogMsg, String newMsg) throws Exception {
+        String threadContent = getThreadMsg(threadName);
+        threadContent = threadContent.replaceFirst(ogMsg, newMsg);
+
+        File thread = new File(threadName);
+        Scanner scanner = new Scanner(thread);
+        String creator = scanner.nextLine();
+        scanner.close();
+
+        FileWriter writer = new FileWriter(thread, false);
+        writer.write(creator + "\n" + threadContent);
+        writer.close();
     }
 }
