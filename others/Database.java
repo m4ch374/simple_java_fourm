@@ -163,6 +163,40 @@ public class Database {
         writer.close();
     }
 
+    public boolean threadHasMsgId(String threadName, int msgId) throws Exception {
+        String msg = getMsgInTread(threadName, msgId);
+
+        if (msg == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public boolean editThreadMessage(String userName, String threadName, int msgId, String msg) throws Exception {
+        if (!threadMsgIsOwner(userName, threadName, msgId)) {
+            return false;
+        }
+
+        String originalMsg = getMsgInTread(threadName, msgId);
+        String threadContent = getThreadMsg(threadName);
+        threadContent = threadContent.replaceFirst(
+                originalMsg, 
+                originalMsg.split(" ")[0] + " " + userName + ": " + msg + "\n"
+            );
+
+        File thread = new File(threadName);
+        Scanner scanner = new Scanner(thread);
+        String creator = scanner.nextLine();
+        scanner.close();
+
+        FileWriter writer = new FileWriter(thread, false);
+        writer.write(creator + "\n" + threadContent);
+        writer.close();
+        
+        return true;
+    }
+
     public void printCredentials() {
         for (User usr : users) {
             System.out.println("[" + usr.username + " , " + usr.password + "]");
@@ -205,5 +239,39 @@ public class Database {
         }
         scanner.close();
         return largest_id + 1;
+    }
+
+    private String getMsgInTread(String threadName, int msgId) throws Exception {
+        File thread = new File(DIR_PATH + threadName);
+        Scanner scanner = new Scanner(thread);
+        scanner.nextLine(); // Skips first line
+
+        while (scanner.hasNextLine()) {
+            int currId;
+            String currMsg = scanner.nextLine();
+            try {
+                currId = Integer.parseInt(currMsg.split(" ")[0]);
+            } catch (Exception e) {
+                continue;
+            }
+
+            if (currId == msgId) {
+                scanner.close();
+                return currMsg;
+            }
+        }
+        scanner.close();
+        return null;
+    }
+
+    private boolean threadMsgIsOwner(String userName, String threadName, int msgId) throws Exception {
+        String ogMessage = getMsgInTread(threadName, msgId);
+        String owner = ogMessage.split(" ")[1];
+        System.out.println(owner);
+        if (!owner.equals(userName + ":")) {
+            return false;
+        }
+
+        return true;
     }
 }

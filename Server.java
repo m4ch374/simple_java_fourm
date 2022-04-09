@@ -86,6 +86,8 @@ public class Server {
                 return processCreateThread(body);
             case "MSG":
                 return processPostMessage(body);
+            case "EDT":
+                return processEditMessage(body);
             case "LST":
                 return processListThread(body);
             case "RDT":
@@ -177,7 +179,7 @@ public class Server {
         if (threadList.equals("")) {
             return "OK No threads to list";
         } else {
-            return "OK " + threadList;
+            return "OK List of threads:\n" + threadList;
         }
     }
 
@@ -199,7 +201,12 @@ public class Server {
             return "ERR " + errMsg;
         }
 
-        return "OK " + database.getThreadMsg(threadName);
+        String threadContent = database.getThreadMsg(threadName);
+        if (threadContent.equals("")) {
+            return "OK No messages in thread";
+        }
+
+        return "OK " + threadContent;
     }
 
     private static String processRemoveThread(String args) throws Exception {
@@ -260,6 +267,47 @@ public class Server {
         database.postMsgToThread(usr.username, threadName, message);
         System.out.println(usr.username + " posted message to thread " + threadName);
         return "OK Message posted to " + threadName;
+    }
+
+    private static String processEditMessage(String args) throws Exception {
+        // Initial error handling
+        String[] splittedArgs = args.split(" ", 4);
+        if (splittedArgs.length != 4) {
+            printCommandFailedUse("EDT");
+            return INVALID_USAGE;
+        }
+
+        User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
+        String thread = splittedArgs[1];
+        int msgId = Integer.parseInt(splittedArgs[2]);
+        String message = splittedArgs[3];
+
+        String errMsg = usr.username + " failed to edit message:";
+        if (!database.threadExist(thread)) {
+            String eString = "Thread " + thread + " does not exist";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            return "ERR " + eString;
+        }
+
+        if (!database.threadHasMsgId(thread, msgId)) {
+            String eString = "Message ID " + msgId + " does not exist in thread";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            return "ERR " + eString;
+        }
+
+        if (!database.editThreadMessage(usr.username, thread, msgId, message)) {
+            String eString = "Not sender of message";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            return "ERR " + eString;
+        }
+
+        return "OK Message edited";
     }
     // ======================================================================
 
