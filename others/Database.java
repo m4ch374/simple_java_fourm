@@ -87,8 +87,7 @@ public class Database {
             return false;
         }
 
-        String fileName = DIR_PATH + threadName;
-        FileWriter fileWriter = new FileWriter(fileName, false);
+        FileWriter fileWriter = new FileWriter(threadName, false);
         fileWriter.write(usrName + "\n");
         fileWriter.close();
         threads.add(threadName);
@@ -109,7 +108,7 @@ public class Database {
     }
 
     public String getThreadMsg(String threadName) throws Exception {
-        File thread = new File(DIR_PATH + threadName);
+        File thread = new File(threadName);
         Scanner scanner = new Scanner(thread);
         scanner.nextLine(); // skips first line
 
@@ -126,8 +125,7 @@ public class Database {
     }
 
     public boolean removeThread(String userName, String threadName) throws Exception {
-        String filePath = DIR_PATH + threadName;
-        File thread = new File(filePath);
+        File thread = new File(threadName);
 
         Scanner scanner = new Scanner(thread);
         String owner = scanner.nextLine();
@@ -157,7 +155,7 @@ public class Database {
     }
 
     public void postMsgToThread(String userName, String threadName, String msg) throws Exception {
-        File thread = new File(DIR_PATH + threadName);
+        File thread = new File(threadName);
         FileWriter writer = new FileWriter(thread, true);
         writer.write(getMsgId(threadName) + " " + userName + ": " + msg + "\n");
         writer.close();
@@ -223,7 +221,7 @@ public class Database {
     }
 
     private int getMsgId(String threadName) throws Exception {
-        File thread = new File(DIR_PATH + threadName);
+        File thread = new File(threadName);
         Scanner scanner = new Scanner(thread);
         scanner.nextLine(); // skips the first line
 
@@ -242,7 +240,7 @@ public class Database {
     }
 
     private String getMsgInTread(String threadName, int msgId) throws Exception {
-        File thread = new File(DIR_PATH + threadName);
+        File thread = new File(threadName);
         Scanner scanner = new Scanner(thread);
         scanner.nextLine(); // Skips first line
 
