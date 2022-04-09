@@ -32,7 +32,15 @@ public class Client {
             System.out.println("Please enter a command: ");
             System.out.println("CRT, MSG, DLT, EDT, LST, RDT, UPD, DWN, RMV, XIT: ");
             String content = scanner.nextLine();
-            HPTPacket response = client.sendRequest(content + " " + clientId);
+            
+            // Build request
+            String[] splittedContent = content.split(" ", 2);
+            String request = splittedContent[0] + " " + clientId;
+            if (splittedContent.length > 1) {
+                request += " " + splittedContent[1];
+            }
+
+            HPTPacket response = client.sendRequest(request);
 
             processResopnse(response);
             System.out.print("\n");

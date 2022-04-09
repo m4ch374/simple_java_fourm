@@ -83,13 +83,12 @@ public class Database {
     }
 
     public boolean createThread(String usrName, String threadName) throws Exception {
-        String fileName = DIR_PATH + threadName;
-        File thread = new File(fileName);
-        if (!thread.createNewFile()) {
+        if (threads.contains(threadName)) {
             return false;
         }
-        
-        FileWriter fileWriter = new FileWriter(fileName);
+
+        String fileName = DIR_PATH + threadName;
+        FileWriter fileWriter = new FileWriter(fileName, false);
         fileWriter.write(usrName + "\n");
         fileWriter.close();
         threads.add(threadName);
@@ -98,8 +97,13 @@ public class Database {
 
     public String getThreadList() {
         String threadList = "";
-        for (String threadName : threads) {
-            threadList += threadName + "\n";
+        int threadLen = threads.size();
+        for (int i = 0; i < threadLen; i++) {
+            threadList += threads.get(i);
+            
+            if (i != threadLen - 1) {
+                threadList += "\n";
+            }
         }
         return threadList;
     }

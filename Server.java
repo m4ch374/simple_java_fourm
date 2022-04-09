@@ -140,9 +140,8 @@ public class Server {
         }
 
         // Create and check if thread already exist
-        String threadName = splittedArgs[0];
-        int usrId = Integer.parseInt(splittedArgs[1]);
-        User usr = database.users.get(usrId);
+        String threadName = splittedArgs[1];
+        User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
         if (database.createThread(usr.username, threadName)) {
             System.out.println(usr.username + " created thread " + threadName);
             return "OK Thread " + threadName + " created";
@@ -181,8 +180,8 @@ public class Server {
             return INVALID_USAGE;
         }
 
-        String threadName = splittedArgs[0];
-        User usr = database.users.get(Integer.parseInt(splittedArgs[1]));
+        String threadName = splittedArgs[1];
+        User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
 
         String failedPrompt = usr.username + " failed to remove thread:";
 
