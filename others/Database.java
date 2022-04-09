@@ -78,6 +78,10 @@ public class Database {
         return newId;
     }
 
+    public boolean threadExist(String threadName) {
+        return threads.contains(threadName);
+    }
+
     public boolean createThread(String usrName, String threadName) throws Exception {
         String fileName = DIR_PATH + threadName;
         File thread = new File(fileName);
@@ -98,6 +102,37 @@ public class Database {
             threadList += threadName + "\n";
         }
         return threadList;
+    }
+
+    public boolean removeThread(String userName, String threadName) throws Exception {
+        String filePath = DIR_PATH + threadName;
+        File thread = new File(filePath);
+
+        Scanner scanner = new Scanner(thread);
+        String owner = scanner.nextLine();
+        scanner.close();
+
+        if (!owner.equals(userName)) {
+            return false;
+        }
+
+        // Remove thread
+        thread.delete();
+        threads.remove(threadName);
+
+        //Remove files uploaded to the thread
+        File dir = new File(DIR_PATH);
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            if (file.isFile()) {
+                String[] splittedName = file.getName().split("-");
+                if (splittedName.length == 2 && splittedName[0].equals(threadName)) {
+                    file.delete();
+                }
+            }
+        }
+
+        return true;
     }
 
     public void printCredentials() {

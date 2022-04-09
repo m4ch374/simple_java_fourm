@@ -86,6 +86,8 @@ public class Server {
                 return processCreateThread(body);
             case "LST":
                 return processListThread(body);
+            case "RMV":
+                return processRemoveThread(body);
             case "XIT":
                 return processExit(body);
             default:
@@ -153,7 +155,7 @@ public class Server {
         }
     }
 
-    private static String processListThread(String args) throws Exception {
+    private static String processListThread(String args) {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 1) {
@@ -169,6 +171,38 @@ public class Server {
         } else {
             return "OK " + threadList;
         }
+    }
+
+    private static String processRemoveThread(String args) throws Exception {
+        // Initial error handling
+        String[] splittedArgs = args.split(" ");
+        if (splittedArgs.length != 2) {
+            printCommandFailedUse("RMV");
+            return INVALID_USAGE;
+        }
+
+        String threadName = splittedArgs[0];
+        User usr = database.users.get(Integer.parseInt(splittedArgs[1]));
+
+        String failedPrompt = usr.username + " failed to remove thread:";
+
+        if (!database.threadExist(threadName)) {
+            String errorMsg = "Thread " + threadName + " does not exist";
+            System.out.println(failedPrompt);
+            System.out.println(errorMsg);
+
+            return "ERR " + errorMsg;
+        }
+
+        if (!database.removeThread(usr.username, threadName)) {
+            String errorMsg = "Not owner of original thread";
+            System.out.println(failedPrompt);
+            System.out.println(errorMsg);
+
+            return "ERR " + errorMsg;
+        }
+
+        return "OK Removed thread " + threadName; 
     }
 
     private static String processExit(String args) {
