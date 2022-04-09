@@ -171,13 +171,25 @@ public class Database {
         }
     }
 
+    public boolean deleteThreadMessage(String userName, String threadName, int msgId) throws Exception {
+        if (!threadMsgIsOwner(userName, threadName, msgId)) {
+            return false;
+        }
+
+        String ogMsg = getMsgInTread(threadName, msgId) + "\n";
+        System.out.println(ogMsg);
+        editThreadContent(threadName, ogMsg, "");
+
+        return true;
+    }
+
     public boolean editThreadMessage(String userName, String threadName, int msgId, String msg) throws Exception {
         if (!threadMsgIsOwner(userName, threadName, msgId)) {
             return false;
         }
 
         String originalMsg = getMsgInTread(threadName, msgId);
-        String newMsg = originalMsg.split(" ")[0] + " " + userName + ": " + msg + "\n";
+        String newMsg = originalMsg.split(" ")[0] + " " + userName + ": " + msg;
         editThreadContent(threadName, originalMsg, newMsg);
         
         return true;
@@ -261,7 +273,7 @@ public class Database {
     }
 
     private void editThreadContent(String threadName, String ogMsg, String newMsg) throws Exception {
-        String threadContent = getThreadMsg(threadName);
+        String threadContent = getThreadMsg(threadName) + "\n";
         threadContent = threadContent.replaceFirst(ogMsg, newMsg);
 
         File thread = new File(threadName);

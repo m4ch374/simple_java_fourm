@@ -86,6 +86,8 @@ public class Server {
                 return processCreateThread(body);
             case "MSG":
                 return processPostMessage(body);
+            case "DLT":
+                return processDeleteMessage(body);
             case "EDT":
                 return processEditMessage(body);
             case "LST":
@@ -269,6 +271,47 @@ public class Server {
         return "OK Message posted to " + threadName;
     }
 
+    private static String processDeleteMessage(String args) throws Exception {
+        // Initial error handling
+        String[] splittedArgs = args.split(" ", 3);
+        if (splittedArgs.length != 3) {
+            printCommandFailedUse("DLT");
+            return INVALID_USAGE;
+        }
+
+        User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
+        String threadName = splittedArgs[1];
+        int msgId = Integer.parseInt(splittedArgs[2]);
+
+        String errMsg = usr.username + " failed to delete message";
+        if (!database.threadExist(threadName)) {
+            String eString = "Thread " + threadName + " does not exist";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            return "ERR " + eString;
+        }
+
+        if (!database.threadHasMsgId(threadName, msgId)) {
+            String eString = "Message ID " + msgId + " does not exist";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            return "ERR " + eString;
+        }
+
+        if (!database.deleteThreadMessage(usr.username, threadName, msgId)) {
+            String eString = "Not sender of message";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            return "ERR " + eString;
+        }
+
+        System.out.println(usr.username + " deleted a message");
+        return "OK Message deleted";
+    }
+
     private static String processEditMessage(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ", 4);
@@ -307,6 +350,7 @@ public class Server {
             return "ERR " + eString;
         }
 
+        System.out.println(usr.username + " edited a message");
         return "OK Message edited";
     }
     // ======================================================================
