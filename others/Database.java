@@ -139,6 +139,15 @@ public class Database {
         return true;
     }
 
+    public void postMsgToThread(String userName, String threadName, String msg) throws Exception {
+        int msgId = getMsgId(threadName);
+
+        File thread = new File(threadName);
+        FileWriter writer = new FileWriter(thread, true);
+        writer.write(msgId + " " + userName + ": " + msg + "\n");
+        writer.close();
+    }
+
     public void printCredentials() {
         for (User usr : users) {
             System.out.println("[" + usr.username + " , " + usr.password + "]");
@@ -162,5 +171,24 @@ public class Database {
 
         bufferedReader.close();
         return userList;
+    }
+
+    private int getMsgId(String threadName) throws Exception {
+        File thread = new File(threadName);
+        Scanner scanner = new Scanner(thread);
+        scanner.nextLine(); // skips the first line
+
+        int largest_id = 0;
+        while (scanner.hasNextLine()) {
+            String msg = scanner.nextLine();
+            String strNum = msg.split(" ")[0];
+            try {
+                largest_id = Integer.parseInt(strNum);
+            } catch (Exception e) {
+                continue;
+            }
+        }
+        scanner.close();
+        return largest_id + 1;
     }
 }

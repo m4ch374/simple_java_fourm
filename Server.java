@@ -84,6 +84,8 @@ public class Server {
                 return processNewUser(body);
             case "CRT":
                 return processCreateThread(body);
+            case "MSG":
+                return processPostMessage(body);
             case "LST":
                 return processListThread(body);
             case "RMV":
@@ -95,6 +97,8 @@ public class Server {
         }
     }
 
+    // ======================================================================
+    // Login related functions
     private static String processLogin(String username) {
         System.out.println("Client authenticating...");
 
@@ -130,7 +134,10 @@ public class Server {
         System.out.println("New user created, successful login");
         return "LOGINOK " + newId;
     }
+    // ======================================================================
 
+    // ======================================================================
+    // Thread related functions
     private static String processCreateThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
@@ -203,7 +210,37 @@ public class Server {
 
         return "OK Removed thread " + threadName; 
     }
+    // ======================================================================
 
+    // ======================================================================
+    // Message related functions
+    private static String processPostMessage(String args) throws Exception {
+        String[] splittedArgs = args.split(" ", 3);
+        if (splittedArgs.length != 3) {
+            printCommandFailedUse("MSG");
+            return INVALID_USAGE;
+        }
+
+        User usr = database.users.get(Integer.parseInt((splittedArgs[0])));
+        String threadName = splittedArgs[1];
+        String message = splittedArgs[2];
+
+        if (!database.threadExist(threadName)) {
+            String errMsg = "Thread " + threadName + " does not exist";
+            System.out.println(usr.username + " failed to post message:");
+            System.out.println(errMsg);
+
+            return "ERR " + errMsg;
+        }
+
+        database.postMsgToThread(usr.username, threadName, message);
+        System.out.println(usr.username + " posted message to thread " + threadName);
+        return "OK Message posted to " + threadName;
+    }
+    // ======================================================================
+
+    // ======================================================================
+    // Exit
     private static String processExit(String args) {
         int userId;
         try {
@@ -222,9 +259,13 @@ public class Server {
 
         return "XITOK Goodbye!";
     }
+    // ======================================================================
 
+    // ======================================================================
+    // Helpers
     private static void printCommandFailedUse(String command) {
         System.out.println("A user failed to use " + command + ":");
         System.out.println("Too many / too little arguments");
     }
+    // ======================================================================
 }
