@@ -108,6 +108,23 @@ public class Database {
         return threadList;
     }
 
+    public String getThreadMsg(String threadName) throws Exception {
+        File thread = new File(DIR_PATH + threadName);
+        Scanner scanner = new Scanner(thread);
+        scanner.nextLine(); // skips first line
+
+        String content = "";
+        while (scanner.hasNextLine()) {
+            content += scanner.nextLine();
+
+            if (scanner.hasNextLine()) {
+                content += "\n";
+            }
+        }
+        scanner.close();
+        return content;
+    }
+
     public boolean removeThread(String userName, String threadName) throws Exception {
         String filePath = DIR_PATH + threadName;
         File thread = new File(filePath);
@@ -140,11 +157,9 @@ public class Database {
     }
 
     public void postMsgToThread(String userName, String threadName, String msg) throws Exception {
-        int msgId = getMsgId(threadName);
-
-        File thread = new File(threadName);
+        File thread = new File(DIR_PATH + threadName);
         FileWriter writer = new FileWriter(thread, true);
-        writer.write(msgId + " " + userName + ": " + msg + "\n");
+        writer.write(getMsgId(threadName) + " " + userName + ": " + msg + "\n");
         writer.close();
     }
 
@@ -174,7 +189,7 @@ public class Database {
     }
 
     private int getMsgId(String threadName) throws Exception {
-        File thread = new File(threadName);
+        File thread = new File(DIR_PATH + threadName);
         Scanner scanner = new Scanner(thread);
         scanner.nextLine(); // skips the first line
 

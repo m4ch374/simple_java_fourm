@@ -88,6 +88,8 @@ public class Server {
                 return processPostMessage(body);
             case "LST":
                 return processListThread(body);
+            case "RDT":
+                return processReadThread(body);
             case "RMV":
                 return processRemoveThread(body);
             case "XIT":
@@ -179,6 +181,27 @@ public class Server {
         }
     }
 
+    private static String processReadThread(String args) throws Exception {
+        // Initial error handling
+        String[] splittedArgs = args.split(" ");
+        if (splittedArgs.length != 2) {
+            printCommandFailedUse("RDT");
+            return INVALID_USAGE;
+        }
+
+        User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
+        String threadName = splittedArgs[1];
+        if (!database.threadExist(threadName)) {
+            String errMsg = "Thread " + threadName + " does not exist";
+            System.out.println(usr.username + " failed to read thread:");
+            System.out.println(errMsg);
+
+            return "ERR " + errMsg;
+        }
+
+        return "OK " + database.getThreadMsg(threadName);
+    }
+
     private static String processRemoveThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
@@ -215,6 +238,7 @@ public class Server {
     // ======================================================================
     // Message related functions
     private static String processPostMessage(String args) throws Exception {
+        // Initial error handling
         String[] splittedArgs = args.split(" ", 3);
         if (splittedArgs.length != 3) {
             printCommandFailedUse("MSG");
