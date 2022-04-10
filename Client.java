@@ -144,7 +144,7 @@ public class Client {
 
         if (response.header.equals("UPDOK")) {
             client.uploadFile(response.content);
-            System.out.println("File uploaded");
+            System.out.println("File uploaded\n");
             return;
         }
 

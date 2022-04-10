@@ -218,10 +218,10 @@ public class Database {
         fileOutputStream.close();
 
         // internal processing
-        uploadedFiles.add(fileName);
+        uploadedFiles.add(convertedFileName);
         File thread = new File(threadName);
         FileWriter fileWriter = new FileWriter(thread, true);
-        fileWriter.write(userName + " uploaded " + fileName);
+        fileWriter.write(userName + " uploaded " + fileName + "\n");
         fileWriter.close();
     }
 

@@ -31,15 +31,7 @@ public class Server {
         while (true) {
             HPTPacket clientRequest = server.getRequest();
 
-            String response = processRequest(clientRequest);
-
-            try {
-                server.sendResponce(response);
-            } catch (Exception e) {
-                System.out.println("Exception occurred: \n");
-                System.out.println(e.getMessage());
-                e.printStackTrace();
-            }
+            processRequest(clientRequest);
         }
     }
 
@@ -69,7 +61,7 @@ public class Server {
         return portNum;
     }
 
-    private static String processRequest(HPTPacket request) throws Exception {
+    private static void processRequest(HPTPacket request) throws Exception {
         // System.out.println(request.rawContent);
         String command = request.header;
         String body = request.content;
@@ -77,82 +69,97 @@ public class Server {
         System.out.print("\n");
         switch (command) {
             case "LOGIN":
-                return processLogin(body);
+                processLogin(body);
+                break;
             case "PASSWORD":
-                return processLoginPassword(body);
+                processLoginPassword(body);
+                break;
             case "NEWUSER":
-                return processNewUser(body);
+                processNewUser(body);
+                break;
             case "CRT":
-                return processCreateThread(body);
+                processCreateThread(body);
+                break;
             case "MSG":
-                return processPostMessage(body);
+                processPostMessage(body);
+                break;
             case "DLT":
-                return processDeleteMessage(body);
+                processDeleteMessage(body);
+                break;
             case "EDT":
-                return processEditMessage(body);
+                processEditMessage(body);
+                break;
             case "LST":
-                return processListThread(body);
+                processListThread(body);
+                break;
             case "RDT":
-                return processReadThread(body);
+                processReadThread(body);
+                break;
             case "UPD":
-                return processUploadFile(body);
+                processUploadFile(body);
+                break;
             case "RMV":
-                return processRemoveThread(body);
+                processRemoveThread(body);
+                break;
             case "XIT":
-                return processExit(body);
+                processExit(body);
+                break;
             default:
                 System.out.println("A user has inputted a wrong command");
-                return "ERR Command Not Found";
+                server.sendResponce("ERR Command Not Found");
         }
     }
 
     // ======================================================================
     // Login related functions
-    private static String processLogin(String username) {
+    private static void processLogin(String username) throws Exception {
         System.out.println("Client authenticating...");
 
         if (database.isUserAlreadyLoggedIn(username)) {
             System.out.println("Username " + username + " already logged in");
-            return "ERR Already logged in";
+            server.sendResponce("ERR Already logged in");
+            return;
         }
 
         if (database.usrLogin(username)) {
             System.out.println(username + " entering password");
-            return "UNAMEOK";
+            server.sendResponce("UNAMEOK");
         } else {
             System.out.println("New user, entering password");
-            return "ERR No username";
+            server.sendResponce("ERR No username");
         }
     }
 
-    private static String processLoginPassword(String args) {
+    private static void processLoginPassword(String args) throws Exception {
         String[] credentials = args.split(" ");
 
         int userId = database.usrLoginPassword(credentials[0], credentials[1]);
         if (userId != -1) {
             System.out.println(credentials[0] + " successful login");
-            return "LOGINOK " + userId;
+            server.sendResponce("LOGINOK " + userId);
+            return;
         }
 
         System.out.println("Incorrect password");
-        return "ERR No such user";
+        server.sendResponce("ERR No such user");
     }
 
-    private static String processNewUser(String args) throws Exception {
+    private static void processNewUser(String args) throws Exception {
         int newId = database.addNewUser(args);
         System.out.println("New user created, successful login");
-        return "LOGINOK " + newId;
+        server.sendResponce("LOGINOK " + newId);
     }
     // ======================================================================
 
     // ======================================================================
     // Thread related functions
-    private static String processCreateThread(String args) throws Exception {
+    private static void processCreateThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 2) {
             printCommandFailedUse("CRT");
-            return INVALID_USAGE;
+            server.sendResponce(INVALID_USAGE);
+            return;
         }
 
         // Create and check if thread already exist
@@ -160,40 +167,42 @@ public class Server {
         User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
         if (database.createThread(usr.username, threadName)) {
             System.out.println(usr.username + " created thread " + threadName);
-            return "OK Thread " + threadName + " created";
+            server.sendResponce("OK Thread " + threadName + " created");
         } else {
             System.out.println(usr.username + " failed to create thread:");
 
             String errMsg = "Thread "+ threadName + " already exist";
             System.out.println(errMsg);
-            return "ERR " + errMsg;
+            server.sendResponce("ERR " + errMsg);
         }
     }
 
-    private static String processListThread(String args) {
+    private static void processListThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 1) {
             printCommandFailedUse("LST");
-            return INVALID_USAGE;
+            server.sendResponce(INVALID_USAGE);
+            return;
         }
 
         User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
         String threadList = database.getThreadList();
         System.out.println(usr.username + " listed threads");
         if (threadList.equals("")) {
-            return "OK No threads to list";
+            server.sendResponce("OK No threads to list");
         } else {
-            return "OK List of threads:\n" + threadList;
+            server.sendResponce("OK List of threads:\n" + threadList);
         }
     }
 
-    private static String processReadThread(String args) throws Exception {
+    private static void processReadThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 2) {
             printCommandFailedUse("RDT");
-            return INVALID_USAGE;
+            server.sendResponce(INVALID_USAGE);
+            return;
         }
 
         User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
@@ -203,23 +212,26 @@ public class Server {
             System.out.println(usr.username + " failed to read thread:");
             System.out.println(errMsg);
 
-            return "ERR " + errMsg;
+            server.sendResponce("ERR " + errMsg);
+            return;
         }
 
         String threadContent = database.getThreadMsg(threadName);
         if (threadContent.equals("")) {
-            return "OK No messages in thread";
+            server.sendResponce("OK No messages in thread");
+            return;
         }
 
-        return "OK " + threadContent;
+        server.sendResponce("OK " + threadContent);
     }
 
-    private static String processRemoveThread(String args) throws Exception {
+    private static void processRemoveThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 2) {
             printCommandFailedUse("RMV");
-            return INVALID_USAGE;
+            server.sendResponce(INVALID_USAGE);
+            return;
         }
 
         String threadName = splittedArgs[1];
@@ -232,7 +244,8 @@ public class Server {
             System.out.println(failedPrompt);
             System.out.println(errorMsg);
 
-            return "ERR " + errorMsg;
+            server.sendResponce("ERR " + errorMsg);
+            return;
         }
 
         if (!database.removeThread(usr.username, threadName)) {
@@ -240,21 +253,23 @@ public class Server {
             System.out.println(failedPrompt);
             System.out.println(errorMsg);
 
-            return "ERR " + errorMsg;
+            server.sendResponce("ERR " + errorMsg);
+            return;
         }
 
-        return "OK Removed thread " + threadName; 
+        server.sendResponce("OK Removed thread " + threadName);
     }
     // ======================================================================
 
     // ======================================================================
     // Message related functions
-    private static String processPostMessage(String args) throws Exception {
+    private static void processPostMessage(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ", 3);
         if (splittedArgs.length != 3) {
             printCommandFailedUse("MSG");
-            return INVALID_USAGE;
+            server.sendResponce(INVALID_USAGE);
+            return;
         }
 
         User usr = database.users.get(Integer.parseInt((splittedArgs[0])));
@@ -266,20 +281,22 @@ public class Server {
             System.out.println(usr.username + " failed to post message:");
             System.out.println(errMsg);
 
-            return "ERR " + errMsg;
+            server.sendResponce("ERR " + errMsg);
+            return;
         }
 
         database.postMsgToThread(usr.username, threadName, message);
         System.out.println(usr.username + " posted message to thread " + threadName);
-        return "OK Message posted to " + threadName;
+        server.sendResponce("OK Message posted to " + threadName);
     }
 
-    private static String processDeleteMessage(String args) throws Exception {
+    private static void processDeleteMessage(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ", 3);
         if (splittedArgs.length != 3) {
             printCommandFailedUse("DLT");
-            return INVALID_USAGE;
+            server.sendResponce(INVALID_USAGE);
+            return;
         }
 
         User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
@@ -292,7 +309,8 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            return "ERR " + eString;
+            server.sendResponce("ERR " + eString);
+            return;
         }
 
         if (!database.threadHasMsgId(threadName, msgId)) {
@@ -300,7 +318,8 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            return "ERR " + eString;
+            server.sendResponce("ERR " + eString);
+            return;
         }
 
         if (!database.deleteThreadMessage(usr.username, threadName, msgId)) {
@@ -308,19 +327,21 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            return "ERR " + eString;
+            server.sendResponce("ERR " + eString);
+            return;
         }
 
         System.out.println(usr.username + " deleted a message");
-        return "OK Message deleted";
+        server.sendResponce("OK Message deleted");
     }
 
-    private static String processEditMessage(String args) throws Exception {
+    private static void processEditMessage(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ", 4);
         if (splittedArgs.length != 4) {
             printCommandFailedUse("EDT");
-            return INVALID_USAGE;
+            server.sendResponce(INVALID_USAGE);
+            return;
         }
 
         User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
@@ -334,7 +355,8 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            return "ERR " + eString;
+            server.sendResponce("ERR " + eString);
+            return;
         }
 
         if (!database.threadHasMsgId(thread, msgId)) {
@@ -342,7 +364,8 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            return "ERR " + eString;
+            server.sendResponce("ERR " + eString);
+            return;
         }
 
         if (!database.editThreadMessage(usr.username, thread, msgId, message)) {
@@ -350,22 +373,24 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            return "ERR " + eString;
+            server.sendResponce("ERR " + eString);
+            return;
         }
 
         System.out.println(usr.username + " edited a message");
-        return "OK Message edited";
+        server.sendResponce("OK Message edited");
     }
     // ======================================================================
 
     // ======================================================================
     // File transfer related function
-    private static String processUploadFile(String args) throws Exception {
+    private static void processUploadFile(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 3) {
             printCommandFailedUse("UPD");
-            return INVALID_USAGE;
+            server.sendResponce(INVALID_USAGE);
+            return;
         }
 
         User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
@@ -378,7 +403,8 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            return "ERR " + eString;
+            server.sendResponce("ERR " + eString);
+            return;
         }
 
         String convertedName = threadName + "-" + fileName;
@@ -387,24 +413,25 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            return "ERR " + eString;
+            server.sendResponce("ERR " + eString);
+            return;
         }
 
         server.sendResponce("UPDOK " + fileName);
         processRcivFileFromUser(usr.username, threadName, fileName);
-        return "OK"; // will be dropped
     }
     // ======================================================================
 
     // ======================================================================
     // Exit
-    private static String processExit(String args) {
+    private static void processExit(String args) throws Exception {
         int userId;
         try {
             userId = Integer.parseInt(args);
         } catch (Exception e) {
             printCommandFailedUse("XIT");
-            return INVALID_USAGE;
+            server.sendResponce(INVALID_USAGE);
+            return;
         }
         User usr = database.users.get(userId);
         System.out.println(usr.username + " logged out");
@@ -414,7 +441,7 @@ public class Server {
             System.out.println("\nWaiting for users");
         }
 
-        return "XITOK Goodbye!";
+        server.sendResponce("XITOK Goodbye!");
     }
     // ======================================================================
 
