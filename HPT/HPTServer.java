@@ -5,6 +5,7 @@ import java.net.*;
 public class HPTServer {
     public int portNum;
     DatagramSocket serverSocket;
+    ServerSocket fileServerSocket;
 
     // Dummy client value
     public InetAddress clientAddress = InetAddress.getLocalHost();
@@ -16,6 +17,7 @@ public class HPTServer {
     public HPTServer(int portNum) throws Exception {
         this.portNum = portNum;
         serverSocket = new DatagramSocket(this.portNum);
+        fileServerSocket = new ServerSocket(this.portNum);
     }
 
     public HPTPacket getRequest() throws Exception {
