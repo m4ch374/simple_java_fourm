@@ -42,6 +42,20 @@ public class HPTServer {
         return content;
     }
 
+    public void sendFileToClient(File file) throws Exception {
+        Socket filSocket = fileServerSocket.accept();
+
+        FileInputStream inputStream = new FileInputStream(file);
+        byte[] fileContent = inputStream.readAllBytes();
+        inputStream.close();
+
+        DataOutputStream outputStream = new DataOutputStream(filSocket.getOutputStream());
+        outputStream.write(fileContent);
+        outputStream.close();
+
+        filSocket.close();
+    }
+
     public void sendResponce(String content) throws Exception {
         if (clientPort == -1) {
             throw new Exception("error: Packet did not recieve");

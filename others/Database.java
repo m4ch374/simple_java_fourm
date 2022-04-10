@@ -196,9 +196,9 @@ public class Database {
         return true;
     }
 
-    public boolean fileNameExist(String fileName) {
+    public boolean fileNameExist(String convertedName) {
         for (String name : uploadedFiles) {
-            if (name.equals(fileName)) {
+            if (name.equals(convertedName)) {
                 return true;
             }
         }

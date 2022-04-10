@@ -54,4 +54,20 @@ public class HPTClient {
         outputStream.write(content);
         clientSocket.close();
     }
+
+    public void downloadFile(String fileName) throws Exception {
+        Socket clientSocket = new Socket(this.hostAddress, this.portNum);
+
+        DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());
+        byte[] fileContent = inputStream.readAllBytes();
+        inputStream.close();
+
+        clientSocket.close();
+
+        File file = new File(fileName);
+        file.createNewFile();
+        FileOutputStream outputStream = new FileOutputStream(file);
+        outputStream.write(fileContent);
+        outputStream.close();
+    }
 }

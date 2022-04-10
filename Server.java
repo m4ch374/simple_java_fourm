@@ -1,3 +1,5 @@
+import java.io.File;
+
 import HPT.*;
 import others.*;
 
@@ -97,6 +99,9 @@ public class Server {
                 break;
             case "UPD":
                 processUploadFile(body);
+                break;
+            case "DWN":
+                processDownloadFile(body);
                 break;
             case "RMV":
                 processRemoveThread(body);
@@ -257,6 +262,7 @@ public class Server {
             return;
         }
 
+        System.out.println(usr.username + " removed thread " + threadName);
         server.sendResponce("OK Removed thread " + threadName);
     }
     // ======================================================================
@@ -397,7 +403,7 @@ public class Server {
         String threadName = splittedArgs[1];
         String fileName = splittedArgs[2];
 
-        String errMsg = usr.username + " failed to upload file";
+        String errMsg = usr.username + " failed to upload file:";
         if (!database.threadExist(threadName)) {
             String eString = "Thread " + threadName + " does not exist";
             System.out.println(errMsg);
@@ -419,6 +425,45 @@ public class Server {
 
         server.sendResponce("UPDOK " + fileName);
         processRcivFileFromUser(usr.username, threadName, fileName);
+    }
+
+    private static void processDownloadFile(String args) throws Exception {
+        // Initial error checking
+        String[] splittedArgs = args.split(" ");
+        if (splittedArgs.length != 3) {
+            printCommandFailedUse("DWN");
+            server.sendResponce(INVALID_USAGE);
+            return;
+        }
+
+        User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
+        String threadName = splittedArgs[1];
+        String fileName = splittedArgs[2];
+
+        String errMsg = usr.username + " failed to download file:";
+        if (!database.threadExist(threadName)) {
+            String eString = "Thread " + threadName + " does not exist";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            server.sendResponce("ERR " + eString);
+            return;
+        }
+
+        String convertedName = threadName + "-" + fileName;
+        if (!database.fileNameExist(convertedName)) {
+            String eString = "File " + fileName + " does not exist";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            server.sendResponce("ERR " + eString);
+            return;
+        }
+
+        server.sendResponce("DWNOK " + fileName);
+
+        File file = new File(convertedName);
+        server.sendFileToClient(file);
     }
     // ======================================================================
 

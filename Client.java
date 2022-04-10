@@ -143,8 +143,18 @@ public class Client {
         }
 
         if (response.header.equals("UPDOK")) {
-            client.uploadFile(response.content);
-            System.out.println("File uploaded\n");
+            try {
+                client.uploadFile(response.content);
+                System.out.println("File uploaded\n");
+            } catch (Exception e) {
+                System.out.println("File not found");
+            }
+            return;
+        }
+
+        if (response.header.equals("DWNOK")) {
+            client.downloadFile(response.content);
+            System.out.print("File downloaded\n");
             return;
         }
 
