@@ -94,11 +94,14 @@ public class Server {
                 return processListThread(body);
             case "RDT":
                 return processReadThread(body);
+            case "UPD":
+                return processUploadFile(body);
             case "RMV":
                 return processRemoveThread(body);
             case "XIT":
                 return processExit(body);
             default:
+                System.out.println("A user has inputted a wrong command");
                 return "ERR Command Not Found";
         }
     }
@@ -356,6 +359,44 @@ public class Server {
     // ======================================================================
 
     // ======================================================================
+    // File transfer related function
+    private static String processUploadFile(String args) throws Exception {
+        // Initial error handling
+        String[] splittedArgs = args.split(" ");
+        if (splittedArgs.length != 3) {
+            printCommandFailedUse("UPD");
+            return INVALID_USAGE;
+        }
+
+        User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
+        String threadName = splittedArgs[1];
+        String fileName = splittedArgs[2];
+
+        String errMsg = usr.username + " failed to upload file";
+        if (!database.threadExist(threadName)) {
+            String eString = "Thread " + threadName + " does not exist";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            return "ERR " + eString;
+        }
+
+        String convertedName = threadName + "-" + fileName;
+        if (database.fileNameExist(convertedName)) {
+            String eString = "File " + fileName + " exist";
+            System.out.println(errMsg);
+            System.out.println(eString);
+
+            return "ERR " + eString;
+        }
+
+        server.sendResponce("UPDOK " + fileName);
+        processRcivFileFromUser(usr.username, threadName, fileName);
+        return "OK"; // will be dropped
+    }
+    // ======================================================================
+
+    // ======================================================================
     // Exit
     private static String processExit(String args) {
         int userId;
@@ -382,6 +423,13 @@ public class Server {
     private static void printCommandFailedUse(String command) {
         System.out.println("A user failed to use " + command + ":");
         System.out.println("Too many / too little arguments");
+    }
+
+    private static void processRcivFileFromUser(String userName, String threadName, String fileName) throws Exception {
+        byte[] fileContent = server.getTransferredByte();
+        database.addTransferredFile(userName, threadName, fileName, fileContent);
+
+        System.out.println(userName + " successfully uploaded a file");
     }
     // ======================================================================
 }

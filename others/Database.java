@@ -8,6 +8,7 @@ public class Database {
     public ArrayList<User> users = new ArrayList<User>();
     public ArrayList<User> loggedInUsers = new ArrayList<User>();
     public ArrayList<String> threads = new ArrayList<String>();
+    public ArrayList<String> uploadedFiles = new ArrayList<String>();
 
     private String credFilePath;
 
@@ -193,6 +194,35 @@ public class Database {
         editThreadContent(threadName, originalMsg, newMsg);
         
         return true;
+    }
+
+    public boolean fileNameExist(String fileName) {
+        for (String name : uploadedFiles) {
+            if (name.equals(fileName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void addTransferredFile(String userName, String threadName, String fileName, byte[] fileContent) throws Exception {
+        // Create new file
+        String convertedFileName = threadName + "-" + fileName;
+        File file = new File(convertedFileName);
+        file.createNewFile();
+
+        // Write content to the file
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+        fileOutputStream.write(fileContent);
+        fileOutputStream.close();
+
+        // internal processing
+        uploadedFiles.add(fileName);
+        File thread = new File(threadName);
+        FileWriter fileWriter = new FileWriter(thread, true);
+        fileWriter.write(userName + " uploaded " + fileName);
+        fileWriter.close();
     }
 
     public void printCredentials() {

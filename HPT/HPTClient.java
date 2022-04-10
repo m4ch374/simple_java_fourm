@@ -1,5 +1,6 @@
 package HPT;
 
+import java.io.*;
 import java.net.*;
 
 public class HPTClient {
@@ -40,5 +41,17 @@ public class HPTClient {
         }
 
         return HPTPacket.generateFromUDP(response);
+    }
+
+    public void uploadFile(String fileName) throws Exception {
+        File uploadFile = new File(fileName);
+        FileInputStream inputStream = new FileInputStream(uploadFile);
+        byte[] content = inputStream.readAllBytes();
+        inputStream.close();
+
+        Socket clientSocket = new Socket(hostAddress, portNum);
+        DataOutputStream outputStream = new DataOutputStream(clientSocket.getOutputStream());
+        outputStream.write(content);
+        clientSocket.close();
     }
 }

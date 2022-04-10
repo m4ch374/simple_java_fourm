@@ -135,15 +135,21 @@ public class Client {
         }
     }
 
-    private static void processResopnse(HPTPacket response) {
+    private static void processResopnse(HPTPacket response) throws Exception {
         System.out.print("\n");
-
-        if (!response.content.equals("")) {
-            System.out.println(response.content);
-        }
 
         if (response.header.equals("XITOK")) {
             System.exit(0);
+        }
+
+        if (response.header.equals("UPDOK")) {
+            client.uploadFile(response.content);
+            System.out.println("File uploaded");
+            return;
+        }
+
+        if (!response.content.equals("")) {
+            System.out.println(response.content);
         }
     }
 }

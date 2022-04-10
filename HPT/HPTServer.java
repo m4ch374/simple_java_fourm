@@ -1,11 +1,12 @@
 package HPT;
 
+import java.io.*;
 import java.net.*;
 
 public class HPTServer {
     public int portNum;
-    DatagramSocket serverSocket;
-    ServerSocket fileServerSocket;
+    private DatagramSocket serverSocket;
+    private ServerSocket fileServerSocket;
 
     // Dummy client value
     public InetAddress clientAddress = InetAddress.getLocalHost();
@@ -28,6 +29,17 @@ public class HPTServer {
         clientPort = clientRequest.getPort();
 
         return HPTPacket.generateFromUDP(clientRequest);
+    }
+
+    public byte[] getTransferredByte() throws Exception {
+        Socket fileSocket = fileServerSocket.accept();
+
+        DataInputStream inputStream = new DataInputStream(fileSocket.getInputStream());
+
+        byte[] content = inputStream.readAllBytes();
+        inputStream.close();
+        fileSocket.close();
+        return content;
     }
 
     public void sendResponce(String content) throws Exception {
