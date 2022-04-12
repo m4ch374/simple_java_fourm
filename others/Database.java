@@ -177,9 +177,32 @@ public class Database {
             return false;
         }
 
-        String ogMsg = getMsgInTread(threadName, msgId) + "\n";
-        System.out.println(ogMsg);
-        editThreadContent(threadName, ogMsg, "");
+        File thread = new File(threadName);
+        Scanner scanner = new Scanner(thread);
+
+        int startId = 0;
+        String newContent = "";
+        while(scanner.hasNextLine()) {
+            String msg = scanner.nextLine();
+            String[] splittedMsg = msg.split(" ", 2);
+
+            int currId = -1;
+            try {
+                currId = Integer.parseInt(splittedMsg[0]);
+            } catch (Exception e) {
+                newContent += msg + "\n";
+                continue;
+            }
+
+            if (currId != msgId) {
+                newContent += ++startId + " " + splittedMsg[1] + "\n";
+            }
+        }
+        scanner.close();
+
+        FileWriter fileWriter = new FileWriter(thread, false);
+        fileWriter.write(newContent);
+        fileWriter.close();
 
         return true;
     }
