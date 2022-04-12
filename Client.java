@@ -32,7 +32,7 @@ public class Client {
             // Send content
             System.out.println("Please enter a command: ");
             System.out.println("CRT, MSG, DLT, EDT, LST, RDT, UPD, DWN, RMV, XIT: ");
-            String content = scanner.nextLine();
+            String content = scanner.nextLine().trim();
             
             // Build request
             String[] splittedContent = content.split(" ", 2);
