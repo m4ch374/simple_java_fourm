@@ -10,7 +10,6 @@ public class Server {
 
     // Constants
     private static final String CREDENTIAL_PATH = "./credentials.txt";
-    private static final String INVALID_USAGE = "ERR Invalid command usage";
 
     public static void main(String args[]) throws Exception {
         // Exit the program if there are errors in args
@@ -33,7 +32,8 @@ public class Server {
         while (true) {
             HPTPacket clientRequest = server.getRequest();
 
-            processRequest(clientRequest);
+            ClientProcess clientProcess = new ClientProcess(server, clientRequest, database);
+            clientProcess.start();
         }
     }
 
@@ -62,8 +62,35 @@ public class Server {
         }
         return portNum;
     }
+}
 
-    private static void processRequest(HPTPacket request) throws Exception {
+class ClientProcess extends Thread {
+    private HPTServer server;
+    private HPTPacket request;
+    private Database database;
+
+    // Constants
+    private static final String INVALID_USAGE = "ERR Invalid command usage";
+
+    public ClientProcess(HPTServer server, HPTPacket packet, Database database) throws Exception {
+        this.server = server;
+        this.request = packet;
+        this.database = database;
+    }
+
+    @Override
+    public void run() {
+        super.run();
+
+        try {
+            processRequest();
+        } catch (Exception e) {
+            System.out.println("Exception occurred");
+            e.printStackTrace();
+        }
+    }
+
+    private void processRequest() throws Exception {
         // System.out.println(request.rawContent);
         String command = request.header;
         String body = request.content;
@@ -111,59 +138,59 @@ public class Server {
                 break;
             default:
                 System.out.println("A user has inputted a wrong command");
-                server.sendResponce("ERR Command Not Found");
+                server.sendResponce("ERR Command Not Found", request);
         }
     }
 
     // ======================================================================
     // Login related functions
-    private static void processLogin(String username) throws Exception {
+    private void processLogin(String username) throws Exception {
         System.out.println("Client authenticating...");
 
         if (database.isUserAlreadyLoggedIn(username)) {
             System.out.println("Username " + username + " already logged in");
-            server.sendResponce("ERR Already logged in");
+            server.sendResponce("ERR Already logged in", request);
             return;
         }
 
         if (database.usrLogin(username)) {
             System.out.println(username + " entering password");
-            server.sendResponce("UNAMEOK");
+            server.sendResponce("UNAMEOK", request);
         } else {
             System.out.println("New user, entering password");
-            server.sendResponce("ERR No username");
+            server.sendResponce("ERR No username", request);
         }
     }
 
-    private static void processLoginPassword(String args) throws Exception {
+    private void processLoginPassword(String args) throws Exception {
         String[] credentials = args.split(" ");
 
         int userId = database.usrLoginPassword(credentials[0], credentials[1]);
         if (userId != -1) {
             System.out.println(credentials[0] + " successful login");
-            server.sendResponce("LOGINOK " + userId);
+            server.sendResponce("LOGINOK " + userId, request);
             return;
         }
 
         System.out.println("Incorrect password");
-        server.sendResponce("ERR No such user");
+        server.sendResponce("ERR No such user", request);
     }
 
-    private static void processNewUser(String args) throws Exception {
+    private void processNewUser(String args) throws Exception {
         int newId = database.addNewUser(args);
         System.out.println("New user created, successful login");
-        server.sendResponce("LOGINOK " + newId);
+        server.sendResponce("LOGINOK " + newId, request);
     }
     // ======================================================================
 
     // ======================================================================
     // Thread related functions
-    private static void processCreateThread(String args) throws Exception {
+    private void processCreateThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 2) {
             printCommandFailedUse("CRT");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
 
@@ -172,22 +199,22 @@ public class Server {
         User usr = database.users.get(Integer.parseInt(splittedArgs[0]));
         if (database.createThread(usr.username, threadName)) {
             System.out.println(usr.username + " created thread " + threadName);
-            server.sendResponce("OK Thread " + threadName + " created");
+            server.sendResponce("OK Thread " + threadName + " created", request);
         } else {
             System.out.println(usr.username + " failed to create thread:");
 
             String errMsg = "Thread "+ threadName + " already exist";
             System.out.println(errMsg);
-            server.sendResponce("ERR " + errMsg);
+            server.sendResponce("ERR " + errMsg, request);
         }
     }
 
-    private static void processListThread(String args) throws Exception {
+    private void processListThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 1) {
             printCommandFailedUse("LST");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
 
@@ -195,18 +222,18 @@ public class Server {
         String threadList = database.getThreadList();
         System.out.println(usr.username + " listed threads");
         if (threadList.equals("")) {
-            server.sendResponce("OK No threads to list");
+            server.sendResponce("OK No threads to list", request);
         } else {
-            server.sendResponce("OK List of threads:\n" + threadList);
+            server.sendResponce("OK List of threads:\n" + threadList, request);
         }
     }
 
-    private static void processReadThread(String args) throws Exception {
+    private void processReadThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 2) {
             printCommandFailedUse("RDT");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
 
@@ -217,26 +244,26 @@ public class Server {
             System.out.println(usr.username + " failed to read thread:");
             System.out.println(errMsg);
 
-            server.sendResponce("ERR " + errMsg);
+            server.sendResponce("ERR " + errMsg, request);
             return;
         }
 
         System.out.println(usr.username + " is reading thread " + threadName);
         String threadContent = database.getThreadMsg(threadName);
         if (threadContent.equals("")) {
-            server.sendResponce("OK No messages in thread");
+            server.sendResponce("OK No messages in thread", request);
             return;
         }
 
-        server.sendResponce("OK " + threadContent);
+        server.sendResponce("OK " + threadContent, request);
     }
 
-    private static void processRemoveThread(String args) throws Exception {
+    private void processRemoveThread(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 2) {
             printCommandFailedUse("RMV");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
 
@@ -250,7 +277,7 @@ public class Server {
             System.out.println(failedPrompt);
             System.out.println(errorMsg);
 
-            server.sendResponce("ERR " + errorMsg);
+            server.sendResponce("ERR " + errorMsg, request);
             return;
         }
 
@@ -259,23 +286,23 @@ public class Server {
             System.out.println(failedPrompt);
             System.out.println(errorMsg);
 
-            server.sendResponce("ERR " + errorMsg);
+            server.sendResponce("ERR " + errorMsg, request);
             return;
         }
 
         System.out.println(usr.username + " removed thread " + threadName);
-        server.sendResponce("OK Removed thread " + threadName);
+        server.sendResponce("OK Removed thread " + threadName, request);
     }
     // ======================================================================
 
     // ======================================================================
     // Message related functions
-    private static void processPostMessage(String args) throws Exception {
+    private void processPostMessage(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ", 3);
         if (splittedArgs.length != 3) {
             printCommandFailedUse("MSG");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
 
@@ -288,21 +315,21 @@ public class Server {
             System.out.println(usr.username + " failed to post message:");
             System.out.println(errMsg);
 
-            server.sendResponce("ERR " + errMsg);
+            server.sendResponce("ERR " + errMsg, request);
             return;
         }
 
         database.postMsgToThread(usr.username, threadName, message);
         System.out.println(usr.username + " posted message to thread " + threadName);
-        server.sendResponce("OK Message posted to " + threadName);
+        server.sendResponce("OK Message posted to " + threadName, request);
     }
 
-    private static void processDeleteMessage(String args) throws Exception {
+    private void processDeleteMessage(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ", 3);
         if (splittedArgs.length != 3) {
             printCommandFailedUse("DLT");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
 
@@ -316,7 +343,7 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
@@ -325,7 +352,7 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
@@ -334,20 +361,20 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
         System.out.println(usr.username + " deleted a message");
-        server.sendResponce("OK Message deleted");
+        server.sendResponce("OK Message deleted", request);
     }
 
-    private static void processEditMessage(String args) throws Exception {
+    private void processEditMessage(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ", 4);
         if (splittedArgs.length != 4) {
             printCommandFailedUse("EDT");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
 
@@ -362,7 +389,7 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
@@ -371,7 +398,7 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
@@ -380,23 +407,23 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
         System.out.println(usr.username + " edited a message");
-        server.sendResponce("OK Message edited");
+        server.sendResponce("OK Message edited", request);
     }
     // ======================================================================
 
     // ======================================================================
     // File transfer related function
-    private static void processUploadFile(String args) throws Exception {
+    private void processUploadFile(String args) throws Exception {
         // Initial error handling
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 3) {
             printCommandFailedUse("UPD");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
 
@@ -410,7 +437,7 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
@@ -420,20 +447,20 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
-        server.sendResponce("UPDOK " + fileName);
+        server.sendResponce("UPDOK " + fileName, request);
         processRcivFileFromUser(usr.username, threadName, fileName);
     }
 
-    private static void processDownloadFile(String args) throws Exception {
+    private void processDownloadFile(String args) throws Exception {
         // Initial error checking
         String[] splittedArgs = args.split(" ");
         if (splittedArgs.length != 3) {
             printCommandFailedUse("DWN");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
 
@@ -447,7 +474,7 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
@@ -457,11 +484,11 @@ public class Server {
             System.out.println(errMsg);
             System.out.println(eString);
 
-            server.sendResponce("ERR " + eString);
+            server.sendResponce("ERR " + eString, request);
             return;
         }
 
-        server.sendResponce("DWNOK " + fileName);
+        server.sendResponce("DWNOK " + fileName, request);
 
         File file = new File(convertedName);
         server.sendFileToClient(file);
@@ -470,13 +497,13 @@ public class Server {
 
     // ======================================================================
     // Exit
-    private static void processExit(String args) throws Exception {
+    private void processExit(String args) throws Exception {
         int userId;
         try {
             userId = Integer.parseInt(args);
         } catch (Exception e) {
             printCommandFailedUse("XIT");
-            server.sendResponce(INVALID_USAGE);
+            server.sendResponce(INVALID_USAGE, request);
             return;
         }
         User usr = database.users.get(userId);
@@ -487,18 +514,18 @@ public class Server {
             System.out.println("\nWaiting for users");
         }
 
-        server.sendResponce("XITOK Goodbye!");
+        server.sendResponce("XITOK Goodbye!", request);
     }
     // ======================================================================
 
     // ======================================================================
     // Helpers
-    private static void printCommandFailedUse(String command) {
+    private void printCommandFailedUse(String command) {
         System.out.println("A user failed to use " + command + ":");
         System.out.println("Too many / too little arguments");
     }
 
-    private static void processRcivFileFromUser(String userName, String threadName, String fileName) throws Exception {
+    private void processRcivFileFromUser(String userName, String threadName, String fileName) throws Exception {
         byte[] fileContent = server.getTransferredByte();
         database.addTransferredFile(userName, threadName, fileName, fileContent);
 

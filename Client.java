@@ -139,6 +139,7 @@ public class Client {
         System.out.print("\n");
 
         if (response.header.equals("XITOK")) {
+            client.clientSocket.close();
             System.exit(0);
         }
 

@@ -8,10 +8,6 @@ public class HPTServer {
     private DatagramSocket serverSocket;
     private ServerSocket fileServerSocket;
 
-    // Dummy client value
-    public InetAddress clientAddress = InetAddress.getLocalHost();
-    public int clientPort = -1;
-
     // Constants
     private static final int PACKETLEN = 8192;
 
@@ -24,9 +20,6 @@ public class HPTServer {
     public HPTPacket getRequest() throws Exception {
         DatagramPacket clientRequest = new DatagramPacket(new byte[PACKETLEN], PACKETLEN);
         serverSocket.receive(clientRequest);
-
-        clientAddress = clientRequest.getAddress();
-        clientPort = clientRequest.getPort();
 
         return HPTPacket.generateFromUDP(clientRequest);
     }
@@ -56,14 +49,10 @@ public class HPTServer {
         filSocket.close();
     }
 
-    public void sendResponce(String content) throws Exception {
-        if (clientPort == -1) {
-            throw new Exception("error: Packet did not recieve");
-        }
-
+    public void sendResponce(String content, HPTPacket packet) throws Exception {
         byte[] contentBuffer = content.getBytes();
         DatagramPacket responsePacket 
-            = new DatagramPacket(contentBuffer, contentBuffer.length, clientAddress, clientPort);
+            = new DatagramPacket(contentBuffer, contentBuffer.length, packet.sourceAddress, packet.sourcePort);
         serverSocket.send(responsePacket);
     }
 }

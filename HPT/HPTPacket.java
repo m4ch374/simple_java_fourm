@@ -6,9 +6,13 @@ public class HPTPacket {
     public String header;
     public String content;
     public String rawContent;
+    public InetAddress sourceAddress;
+    public int sourcePort;
 
-    public HPTPacket(String rawContent) {
+    public HPTPacket(String rawContent, InetAddress sourAddress, int sourcePort) {
         this.rawContent = rawContent;
+        this.sourceAddress = sourAddress;
+        this.sourcePort = sourcePort;
 
         String[] splittedContent = rawContent.split(" ", 2);
 
@@ -33,6 +37,6 @@ public class HPTPacket {
 
     public static HPTPacket generateFromUDP(DatagramPacket packet) throws Exception {
         String packetContent = getUdpContent(packet);
-        return new HPTPacket(packetContent);
+        return new HPTPacket(packetContent, packet.getAddress(), packet.getPort());
     }
 }
