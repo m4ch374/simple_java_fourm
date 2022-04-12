@@ -221,6 +221,7 @@ public class Server {
             return;
         }
 
+        System.out.println(usr.username + " is reading thread " + threadName);
         String threadContent = database.getThreadMsg(threadName);
         if (threadContent.equals("")) {
             server.sendResponce("OK No messages in thread");
