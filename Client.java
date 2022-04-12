@@ -7,6 +7,7 @@ public class Client {
     // Attributes
     private static int clientId;
     private static HPTClient client;
+    private static Scanner scanner;
 
     public static void main(String args[]) throws Exception {
         // Exit the program if there are errors in args
@@ -21,7 +22,7 @@ public class Client {
 
         // Setup client
         // Socket timeout is 500ms
-        Scanner scanner = new Scanner(System.in);
+        scanner = new Scanner(System.in);
         client = new HPTClient(serverAddress, portNum, 500);
         loginToServer(scanner);
 
@@ -139,6 +140,7 @@ public class Client {
         System.out.print("\n");
 
         if (response.header.equals("XITOK")) {
+            scanner.close();
             client.clientSocket.close();
             System.exit(0);
         }
