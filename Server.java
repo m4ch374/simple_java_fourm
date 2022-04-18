@@ -492,6 +492,7 @@ class ClientProcess extends Thread {
 
         File file = new File(convertedName);
         server.sendFileToClient(file);
+        System.out.println(usr.username + " successfully downloaded a file");
     }
     // ======================================================================
 
