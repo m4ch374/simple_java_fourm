@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class Database {
-    // An array containing User object
+    // An array containing various data
     public ArrayList<User> users = new ArrayList<User>();
     public ArrayList<User> loggedInUsers = new ArrayList<User>();
     public ArrayList<String> threads = new ArrayList<String>();
@@ -14,15 +14,6 @@ public class Database {
 
     // Constants
     private static final String DIR_PATH = "./";
-    // private static final String[] OG_FILE_LIST = new String[] {
-    //         ".gitignore", 
-    //         "README.md", 
-    //         "credentials.txt", 
-    //         "Server.java",
-    //         "Client.class",
-    //         "Server.class",
-    //         "Client.java"
-    //     };
 
     public Database(String credFilePath) throws Exception{
         this.credFilePath = credFilePath;

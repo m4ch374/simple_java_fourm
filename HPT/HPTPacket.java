@@ -26,12 +26,6 @@ public class HPTPacket {
     }
 
     public static String getUdpContent(DatagramPacket packet) throws Exception {
-        // ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(packet.getData());
-
-        // InputStreamReader streamReader = new InputStreamReader(arrayInputStream);
-
-        // BufferedReader bufferedReader = new BufferedReader(streamReader);
-
         return new String(packet.getData(), 0, packet.getLength());
     }
 
